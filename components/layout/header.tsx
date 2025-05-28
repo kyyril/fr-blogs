@@ -44,7 +44,6 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <PenSquare className="h-6 w-6" />
           <span className="hidden text-xl font-bold sm:inline-block">
             Blogify
           </span>
@@ -69,7 +68,7 @@ export function Header() {
         {/* Desktop Right Actions */}
         <div className="hidden items-center gap-4 md:flex">
           {isSearchOpen ? (
-            <div className="relative w-full max-w-xs animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="relative w-full max-w-xs animate-in fade-in slide-in-from-left-4 duration-300">
               <Input
                 type="search"
                 placeholder="Search blogs..."
@@ -152,14 +151,19 @@ export function Header() {
               </Link>
             ))}
             {isAuthenticated ? (
-              <Link
-                href="/blog/create"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <PenSquare className="h-4 w-4" />
-                Write
-              </Link>
+              <div className="flex justify-between">
+                <Link
+                  href="/blog/create"
+                  className="flex items-center gap-2 mx-4 py-2 text-sm font-medium hover:opacity-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <PenSquare className="h-4 w-4" />
+                  Write
+                </Link>
+                <span className="mx-4 hover:opacity-50">
+                  {isAuthenticated ? <UserNav /> : ""}
+                </span>
+              </div>
             ) : (
               <>
                 <Link
