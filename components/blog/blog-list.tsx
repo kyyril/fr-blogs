@@ -1,11 +1,11 @@
-'use client';
-
-import { useState } from 'react';
-import { BlogCard } from '@/components/blog/blog-card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useInView } from 'react-intersection-observer';
-import { mockBlogs } from '@/lib/mock-data';
+"use client";
+import { useState, useEffect } from "react";
+import { BlogCard } from "@/components/blog/blog-card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useInView } from "react-intersection-observer";
+import { Blog } from "@/lib/types/data.interface";
+import { useBlog } from "@/hooks/useBlog";
 
 interface BlogListProps {
   featured?: boolean;
@@ -14,40 +14,112 @@ interface BlogListProps {
 }
 
 export function BlogList({ featured = false, category, limit }: BlogListProps) {
-  const [blogs, setBlogs] = useState(mockBlogs.slice(0, limit || 9));
-  const [isLoading, setIsLoading] = useState(false);
+  const [allBlogs, setAllBlogs] = useState<Blog[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { ref, inView } = useInView();
 
-  // This would normally be a useEffect hook that triggers data loading when inView becomes true
-  // For now, we're just using mock data
+  // Use appropriate hook based on category filter
+  const { getBlogs, getBlogsByCategory } = useBlog();
 
-  const filteredBlogs = category
-    ? blogs.filter((blog) => blog.category.toLowerCase() === category.toLowerCase())
-    : blogs;
+  // Determine which query to use
+  const query = category
+    ? getBlogsByCategory(category, currentPage, limit || 9)
+    : getBlogs(currentPage, limit || 9);
+
+  const { data, isLoading, error, isFetching } = query;
+
+  // Update blogs when data changes
+  useEffect(() => {
+    if (data?.blogs) {
+      if (currentPage === 1) {
+        setAllBlogs(data.blogs);
+      } else {
+        setAllBlogs((prev) => [...prev, ...data.blogs]);
+      }
+
+      // Check if there are more pages
+      setHasMore(data.pagination.page < data.pagination.totalPages);
+    }
+  }, [data, currentPage]);
+
+  // Auto-load more when scrolling into view (infinite scroll)
+  useEffect(() => {
+    if (inView && hasMore && !isFetching && !limit) {
+      loadMore();
+    }
+  }, [inView, hasMore, isFetching, limit]);
 
   const loadMore = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      const newBlogs = mockBlogs.slice(blogs.length, blogs.length + 6);
-      if (newBlogs.length === 0) {
-        setHasMore(false);
-      } else {
-        setBlogs([...blogs, ...newBlogs]);
-      }
-      setIsLoading(false);
-    }, 1000);
+    if (hasMore && !isFetching) {
+      setCurrentPage((prev) => prev + 1);
+    }
   };
 
-  if (filteredBlogs.length === 0 && !isLoading) {
+  // Transform data to match BlogCard interface
+  const transformBlogData = (blog: Blog) => ({
+    id: blog.id,
+    title: blog.title,
+    slug: blog.slug,
+    excerpt: blog.description,
+    coverImage: blog.image,
+    category: blog.categories?.[0]?.category?.name || "Uncategorized",
+    createdAt: blog.date,
+    readTime: blog.readingTime,
+    author: {
+      name: blog.author?.name || "Anonymous",
+      image: blog.author?.avatar || "/default-avatar.png",
+    },
+    stats: {
+      likes: 0, // You can add likes functionality later
+      comments: blog.comments?.length || 0,
+      views: blog.viewCount,
+    },
+  });
+
+  // Handle error state
+  if (error && currentPage === 1) {
     return (
       <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed p-8 text-center">
         <div>
-          <p className="text-muted-foreground">No blogs found in this category.</p>
-          <Button variant="link" className="mt-2" onClick={() => setBlogs(mockBlogs)}>
-            View all blogs
+          <p className="text-muted-foreground">
+            Failed to load blogs. Please try again.
+          </p>
+          <Button
+            variant="link"
+            className="mt-2"
+            onClick={() => window.location.reload()}
+          >
+            Retry
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle empty state
+  if (!isLoading && allBlogs.length === 0) {
+    return (
+      <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed p-8 text-center">
+        <div>
+          <p className="text-muted-foreground">
+            {category
+              ? `No blogs found in "${category}" category.`
+              : "No blogs found."}
+          </p>
+          {category && (
+            <Button
+              variant="link"
+              className="mt-2"
+              onClick={() => {
+                setCurrentPage(1);
+                setAllBlogs([]);
+                // You might want to emit an event to clear category filter
+              }}
+            >
+              View all blogs
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -56,14 +128,21 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
   return (
     <div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredBlogs.map((blog) => (
-          <BlogCard key={blog.id} blog={blog} featured={featured} />
+        {allBlogs.map((blog) => (
+          <BlogCard
+            key={blog.id}
+            blog={transformBlogData(blog)}
+            featured={featured}
+          />
         ))}
 
         {/* Loading skeletons */}
-        {isLoading &&
+        {(isLoading || isFetching) &&
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={`skeleton-${i}`} className="overflow-hidden rounded-lg border shadow">
+            <div
+              key={`skeleton-${i}`}
+              className="overflow-hidden rounded-lg border shadow"
+            >
               <Skeleton className="h-48 w-full" />
               <div className="p-4">
                 <Skeleton className="mb-2 h-4 w-2/3" />
@@ -83,15 +162,15 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
       </div>
 
       {/* Load more button - visible only if hasMore is true and not at the limit */}
-      {hasMore && !limit && (
+      {hasMore && !limit && allBlogs.length > 0 && (
         <div className="mt-8 flex justify-center" ref={ref}>
           <Button
             onClick={loadMore}
-            disabled={isLoading}
+            disabled={isFetching}
             variant="outline"
             className="min-w-[150px]"
           >
-            {isLoading ? 'Loading...' : 'Load More'}
+            {isFetching ? "Loading..." : "Load More"}
           </Button>
         </div>
       )}
