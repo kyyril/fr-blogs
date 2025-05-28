@@ -1,15 +1,5 @@
-import { httpService } from './http.services';
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  image?: string;
-  bio?: string;
-  followersCount: number;
-  followingCount: number;
-  isFollowing: boolean;
-}
+import { User } from "@/lib/types/data.interface";
+import { httpService } from "./http.services";
 
 export class UserService {
   private static instance: UserService;

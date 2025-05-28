@@ -1,6 +1,6 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { config } from '@/constants/config';
-import { tokenService } from './token.services';
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { config } from "@/constants/config";
+import { tokenService } from "./token.services";
 
 export class HttpService {
   private static instance: HttpService;
@@ -10,7 +10,7 @@ export class HttpService {
     this.axiosInstance = axios.create({
       baseURL: config.apiBaseUrl,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -41,7 +41,7 @@ export class HttpService {
       (error) => {
         if (error.response?.status === 401) {
           tokenService.removeToken();
-          window.location.href = '/login';
+          window.location.href = "/login";
         }
         return Promise.reject(error);
       }
@@ -53,12 +53,25 @@ export class HttpService {
     return response.data;
   }
 
-  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.axiosInstance.post<T>(url, data, config);
-    return response.data;
+  async post<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    try {
+      const response = await this.axiosInstance.post<T>(url, data, config);
+      return response.data;
+    } catch (error: any) {
+      console.error("POST error:", error.response?.data || error.message);
+      throw error;
+    }
   }
 
-  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+  async put<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
     const response = await this.axiosInstance.put<T>(url, data, config);
     return response.data;
   }

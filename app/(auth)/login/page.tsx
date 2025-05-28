@@ -1,9 +1,11 @@
-import { Metadata } from 'next';
-import { LoginForm } from '@/components/auth/login-form';
+import { Metadata } from "next";
+import { LoginForm } from "@/components/auth/login-form";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { config } from "@/constants/config";
 
 export const metadata: Metadata = {
-  title: 'Login - Blogify',
-  description: 'Login to your Blogify account',
+  title: "Login - Blogify",
+  description: "Login to your Blogify account",
 };
 
 export default function LoginPage() {
@@ -14,7 +16,9 @@ export default function LoginPage() {
           <h2 className="text-3xl font-bold">Welcome back</h2>
           <p className="mt-2 text-muted-foreground">Sign in to your account</p>
         </div>
-        <LoginForm />
+        <GoogleOAuthProvider clientId={config.googleClientId}>
+          <LoginForm />
+        </GoogleOAuthProvider>
       </div>
     </div>
   );

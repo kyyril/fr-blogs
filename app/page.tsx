@@ -1,8 +1,8 @@
-import { BlogList } from '@/components/blog/blog-list';
-import { FeaturedBlogs } from '@/components/blog/featured-blogs';
-import { CategoryList } from '@/components/blog/category-list';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { BlogList } from "@/components/blog/blog-list";
+import { FeaturedBlogs } from "@/components/blog/featured-blogs";
+import { CategoryList } from "@/components/blog/category-list";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -10,7 +10,9 @@ export default function Home() {
       {/* Hero Section */}
       <section className="mb-16">
         <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-background p-8 text-center md:p-12">
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">Welcome to Blogify</h1>
+          <h1 className="mb-4 text-4xl font-bold md:text-5xl">
+            Welcome to Blogify
+          </h1>
           <p className="mb-6 text-lg text-muted-foreground md:text-xl">
             Discover stories, ideas, and expertise from writers on any topic
           </p>
@@ -38,7 +40,9 @@ export default function Home() {
 
       {/* Categories Section */}
       <section className="mb-16">
-        <h2 className="mb-6 text-2xl font-bold md:text-3xl">Explore Categories</h2>
+        <h2 className="mb-6 text-2xl font-bold md:text-3xl">
+          Explore Categories
+        </h2>
         <CategoryList />
       </section>
 

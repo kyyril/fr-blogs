@@ -1,24 +1,5 @@
-import { httpService } from './http.services';
-
-export interface Blog {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  image: string;
-  categories: string[];
-  tags: string[];
-  readingTime: number;
-  featured: boolean;
-  author: {
-    id: string;
-    name: string;
-    image?: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import { Blog } from "@/lib/types/data.interface";
+import { httpService } from "./http.services";
 
 export interface BlogsResponse {
   blogs: Blog[];
@@ -53,15 +34,15 @@ export class BlogService {
   async createBlog(data: CreateBlogDto): Promise<Blog> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
-      if (key === 'categories' || key === 'tags') {
+      if (key === "categories" || key === "tags") {
         formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value);
       }
     });
 
-    return httpService.post<Blog>('/api/blogs', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+    return httpService.post<Blog>("/api/blogs", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
   }
 
@@ -69,7 +50,7 @@ export class BlogService {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined) {
-        if (key === 'categories' || key === 'tags') {
+        if (key === "categories" || key === "tags") {
           formData.append(key, JSON.stringify(value));
         } else {
           formData.append(key, value);
@@ -78,7 +59,7 @@ export class BlogService {
     });
 
     return httpService.put<Blog>(`/api/blogs/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { "Content-Type": "multipart/form-data" },
     });
   }
 
@@ -87,20 +68,30 @@ export class BlogService {
   }
 
   async getBlogs(page = 1, limit = 10): Promise<BlogsResponse> {
-    return httpService.get<BlogsResponse>(`/api/blogs?page=${page}&limit=${limit}`);
+    return httpService.get<BlogsResponse>(
+      `/api/blogs?page=${page}&limit=${limit}`
+    );
   }
 
   async getBlogBySlug(slug: string): Promise<Blog> {
     return httpService.get<Blog>(`/api/blogs/${slug}`);
   }
 
-  async searchBlogs(query: string, page = 1, limit = 10): Promise<BlogsResponse> {
+  async searchBlogs(
+    query: string,
+    page = 1,
+    limit = 10
+  ): Promise<BlogsResponse> {
     return httpService.get<BlogsResponse>(
       `/api/blogs/search?query=${query}&page=${page}&limit=${limit}`
     );
   }
 
-  async getBlogsByCategory(category: string, page = 1, limit = 10): Promise<BlogsResponse> {
+  async getBlogsByCategory(
+    category: string,
+    page = 1,
+    limit = 10
+  ): Promise<BlogsResponse> {
     return httpService.get<BlogsResponse>(
       `/api/blogs/category/${category}?page=${page}&limit=${limit}`
     );

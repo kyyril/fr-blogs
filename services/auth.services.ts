@@ -7,7 +7,7 @@ export interface LoginResponse {
     id: string;
     email: string;
     name: string;
-    image?: string;
+    avatar?: string;
   };
 }
 
@@ -23,13 +23,11 @@ export class AuthService {
     return AuthService.instance;
   }
 
-  async googleLogin(credential: string): Promise<LoginResponse> {
+  async googleLogin(idToken: string): Promise<LoginResponse> {
     const response = await httpService.post<LoginResponse>("/api/auth/google", {
-      credential,
+      token: idToken,
     });
-
     tokenService.setToken(response.token);
-
     return response;
   }
 
