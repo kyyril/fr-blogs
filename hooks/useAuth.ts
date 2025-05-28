@@ -11,15 +11,21 @@ export const useAuth = () => {
   );
 
   const login = useCallback(
-    async (credential: string) => {
+    async (credential: string): Promise<LoginResponse> => {
       try {
         const response: LoginResponse = await authService.googleLogin(
           credential
         );
+
+        // Dispatch the auth state to Redux
         dispatch(setAuth({ user: response.user }));
+
+        // Return the response for the component to use
         return response;
       } catch (error) {
         console.error("Login failed:", error);
+        // Make sure to clear auth state on failure
+        dispatch(clearAuth());
         throw error;
       }
     },

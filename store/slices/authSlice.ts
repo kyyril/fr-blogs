@@ -6,6 +6,7 @@ interface User {
   email: string;
   name: string;
   avatar?: string;
+  bio?: string;
 }
 
 interface AuthState {
@@ -13,9 +14,37 @@ interface AuthState {
   user: User | null;
 }
 
+// Helper function to get user from localStorage
+const getUserFromStorage = (): User | null => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch (error) {
+    console.error("Error reading user from localStorage:", error);
+    return null;
+  }
+};
+
+// Helper function to save user to localStorage
+const saveUserToStorage = (user: User | null): void => {
+  if (typeof window === "undefined") return;
+
+  try {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("user");
+    }
+  } catch (error) {
+    console.error("Error saving user to localStorage:", error);
+  }
+};
+
 const initialState: AuthState = {
   isAuthenticated: tokenService.isAuthenticated(),
-  user: null,
+  user: getUserFromStorage(),
 };
 
 const authSlice = createSlice({
@@ -25,13 +54,24 @@ const authSlice = createSlice({
     setAuth: (state, action: PayloadAction<{ user: User }>) => {
       state.isAuthenticated = true;
       state.user = action.payload.user;
+      // Persist user data to localStorage
+      saveUserToStorage(action.payload.user);
     },
     clearAuth: (state) => {
       state.isAuthenticated = false;
       state.user = null;
+      // Clear user data from localStorage
+      saveUserToStorage(null);
+    },
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+        // Update localStorage
+        saveUserToStorage(state.user);
+      }
     },
   },
 });
 
-export const { setAuth, clearAuth } = authSlice.actions;
+export const { setAuth, clearAuth, updateUser } = authSlice.actions;
 export default authSlice.reducer;

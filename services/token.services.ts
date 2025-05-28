@@ -14,14 +14,37 @@ export class TokenService {
   }
 
   setToken(token: string): void {
-    const encodedToken = Buffer.from(token).toString("base64");
-    Cookies.set(this.TOKEN_KEY, encodedToken);
+    // Add validation to prevent undefined tokens
+    if (!token || typeof token !== "string") {
+      console.error("Invalid token provided to setToken:", token);
+      return;
+    }
+
+    try {
+      // Use btoa for browser compatibility instead of Buffer
+      const encodedToken = btoa(token);
+      Cookies.set(this.TOKEN_KEY, encodedToken, {
+        expires: 7, // Token expires in 7 days
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+    } catch (error) {
+      console.error("Error encoding token:", error);
+    }
   }
 
   getToken(): string | null {
-    const encodedToken = Cookies.get(this.TOKEN_KEY);
-    if (!encodedToken) return null;
-    return Buffer.from(encodedToken, "base64").toString("ascii");
+    try {
+      const encodedToken = Cookies.get(this.TOKEN_KEY);
+      if (!encodedToken) return null;
+
+      // Use atob for browser compatibility instead of Buffer
+      return atob(encodedToken);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      this.removeToken(); // Remove corrupted token
+      return null;
+    }
   }
 
   removeToken(): void {
@@ -29,7 +52,8 @@ export class TokenService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    return !!token && token.length > 0;
   }
 }
 

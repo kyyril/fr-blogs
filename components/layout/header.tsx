@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { PenSquare, Search, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { UserNav } from '@/components/layout/user-nav';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { PenSquare, Search, Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { UserNav } from "@/components/layout/user-nav";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,37 +16,39 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Mock authentication state - replace with actual auth
-  const isAuthenticated = false;
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/blog', label: 'Blogs' },
-    { href: '/about', label: 'About' },
+    { href: "/", label: "Home" },
+    { href: "/blog", label: "Blogs" },
+    { href: "/about", label: "About" },
   ];
 
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-200 ${
-        isScrolled ? 'bg-background/95 backdrop-blur-sm shadow-sm' : 'bg-transparent'
+        isScrolled
+          ? "bg-background/95 backdrop-blur-sm shadow-sm"
+          : "bg-transparent"
       }`}
     >
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <PenSquare className="h-6 w-6" />
-          <span className="hidden text-xl font-bold sm:inline-block">Blogify</span>
+          <span className="hidden text-xl font-bold sm:inline-block">
+            Blogify
+          </span>
         </Link>
-
         {/* Desktop Navigation */}
         <nav className="hidden md:flex md:items-center md:gap-6">
           {navLinks.map((link) => (
@@ -53,7 +56,9 @@ export function Header() {
               key={link.href}
               href={link.href}
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+                pathname === link.href
+                  ? "text-primary"
+                  : "text-muted-foreground"
               }`}
             >
               {link.label}
@@ -92,7 +97,7 @@ export function Header() {
 
           {isAuthenticated ? (
             <>
-              <Button variant="ghost\" size="sm\" asChild>
+              <Button variant="ghost" size="sm" asChild>
                 <Link href="/blog/create">
                   <PenSquare className="mr-2 h-4 w-4" />
                   Write
@@ -102,11 +107,8 @@ export function Header() {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">Log in</Link>
-              </Button>
               <Button size="sm" asChild>
-                <Link href="/login">Sign up</Link>
+                <Link href="/login">Log in</Link>
               </Button>
             </>
           )}
@@ -121,10 +123,14 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isMobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </Button>
         </div>
       </div>
@@ -138,7 +144,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={`px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary ${
-                  pathname === link.href ? 'text-primary' : 'text-foreground'
+                  pathname === link.href ? "text-primary" : "text-foreground"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -162,13 +168,6 @@ export function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Log in
-                </Link>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-sm font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Sign up
                 </Link>
               </>
             )}

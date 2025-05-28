@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,28 +14,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { BlogEditor } from '@/components/blog/editor';
-import { toast } from '@/components/ui/use-toast';
-import { ImageUpload } from '@/components/blog/image-upload';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+} from "@/components/ui/select";
+import { BlogEditor } from "@/components/blog/editor";
+import { ImageUpload } from "@/components/blog/image-upload";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters').max(100, 'Title must be less than 100 characters'),
-  excerpt: z.string().min(10, 'Excerpt must be at least 10 characters').max(200, 'Excerpt must be less than 200 characters'),
-  content: z.string().min(50, 'Content must be at least 50 characters'),
-  coverImage: z.string().url('Please upload a valid image').or(z.string().length(0)),
-  category: z.string().min(1, 'Please select a category'),
+  title: z
+    .string()
+    .min(5, "Title must be at least 5 characters")
+    .max(100, "Title must be less than 100 characters"),
+  excerpt: z
+    .string()
+    .min(10, "Excerpt must be at least 10 characters")
+    .max(200, "Excerpt must be less than 200 characters"),
+  content: z.string().min(50, "Content must be at least 50 characters"),
+  coverImage: z
+    .string()
+    .url("Please upload a valid image")
+    .or(z.string().length(0)),
+  category: z.string().min(1, "Please select a category"),
   tags: z.array(z.string()).optional(),
 });
 
@@ -49,17 +58,17 @@ interface BlogFormProps {
 export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
   const router = useRouter();
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      title: '',
-      excerpt: '',
-      content: '',
-      coverImage: '',
-      category: '',
+      title: "",
+      excerpt: "",
+      content: "",
+      coverImage: "",
+      category: "",
       tags: [],
     },
   });
@@ -68,24 +77,24 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
     if (!tagInput.trim()) return;
     if (tags.includes(tagInput.trim())) {
       toast({
-        title: 'Tag already exists',
-        description: 'Please enter a different tag',
-        variant: 'destructive',
+        title: "Tag already exists",
+        description: "Please enter a different tag",
+        variant: "destructive",
       });
       return;
     }
-    
+
     if (tags.length >= 5) {
       toast({
-        title: 'Maximum tags reached',
-        description: 'You can only add up to 5 tags',
-        variant: 'destructive',
+        title: "Maximum tags reached",
+        description: "You can only add up to 5 tags",
+        variant: "destructive",
       });
       return;
     }
-    
+
     setTags([...tags, tagInput.trim()]);
-    setTagInput('');
+    setTagInput("");
   };
 
   const removeTag = (tag: string) => {
@@ -94,35 +103,36 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
 
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
-    
+
     try {
       // Include tags in the submission
       const dataToSubmit = {
         ...values,
         tags,
       };
-      
+
       // In a real app, this would be an API call
-      console.log('Submitting form data:', dataToSubmit);
-      
+      console.log("Submitting form data:", dataToSubmit);
+
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+
       toast({
-        title: isEditing ? 'Blog updated' : 'Blog created',
-        description: isEditing 
-          ? 'Your blog has been updated successfully' 
-          : 'Your blog has been published successfully',
+        title: isEditing ? "Blog updated" : "Blog created",
+        description: isEditing
+          ? "Your blog has been updated successfully"
+          : "Your blog has been published successfully",
       });
-      
+
       // Redirect to the blog page
-      router.push('/blog');
+      router.push("/blog");
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
       toast({
-        title: 'An error occurred',
-        description: 'There was an error publishing your blog. Please try again.',
-        variant: 'destructive',
+        title: "An error occurred",
+        description:
+          "There was an error publishing your blog. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -140,13 +150,11 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
             <FormItem>
               <FormLabel>Cover Image</FormLabel>
               <FormControl>
-                <ImageUpload
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <ImageUpload value={field.value} onChange={field.onChange} />
               </FormControl>
               <FormDescription>
-                Upload a cover image for your blog. Recommended size: 1200x630px.
+                Upload a cover image for your blog. Recommended size:
+                1200x630px.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -185,7 +193,8 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
                 />
               </FormControl>
               <FormDescription>
-                A short summary that appears in blog previews. Limited to 200 characters.
+                A short summary that appears in blog previews. Limited to 200
+                characters.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -199,10 +208,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
@@ -238,7 +244,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   addTag();
                 }
@@ -249,7 +255,8 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
             </Button>
           </div>
           <FormDescription>
-            Add up to 5 tags to help readers find your blog. Press Enter or click Add.
+            Add up to 5 tags to help readers find your blog. Press Enter or
+            click Add.
           </FormDescription>
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
@@ -279,10 +286,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <BlogEditor
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <BlogEditor value={field.value} onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -294,7 +298,11 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : isEditing ? 'Update Blog' : 'Publish Blog'}
+            {isSubmitting
+              ? "Saving..."
+              : isEditing
+              ? "Update Blog"
+              : "Publish Blog"}
           </Button>
         </div>
       </form>
