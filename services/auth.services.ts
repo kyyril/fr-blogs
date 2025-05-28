@@ -1,8 +1,6 @@
 import { httpService } from "./http.services";
-import { tokenService } from "./token.services";
 
 export interface LoginResponse {
-  token?: string; // Make token optional since it might not be in response
   user: {
     id: string;
     email: string;
@@ -35,24 +33,9 @@ export class AuthService {
       );
 
       console.log("Auth response:", response);
-
-      // Only set token if it exists in the response
-      if (response.token) {
-        tokenService.setToken(response.token);
-      } else {
-        console.warn(
-          "No token received from server. Login might still be successful."
-        );
-        // If your backend doesn't return a token but login is successful,
-        // you might want to generate a session token or handle it differently
-        // For now, we'll create a simple session indicator
-        tokenService.setToken(`session_${Date.now()}_${response.user.id}`);
-      }
-
       return response;
     } catch (error: any) {
       console.error("Google login error:", error);
-      // Log the full error response for debugging
       if (error.response) {
         console.error("Error response:", error.response.data);
         console.error("Error status:", error.response.status);
@@ -61,11 +44,36 @@ export class AuthService {
     }
   }
 
-  logout(): void {
-    tokenService.removeToken();
-    // Clear any other stored user data
-    localStorage.removeItem("user");
-    window.location.href = "/login";
+  async logout(): Promise<void> {
+    try {
+      await httpService.post("/api/auth/logout");
+
+      // Clear any stored user data
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("user");
+      }
+
+      // Redirect to login page
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if logout fails on server, clear local data and redirect
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
+    }
+  }
+
+  // Check if user is authenticated by making a request to a protected endpoint
+  async checkAuth(): Promise<boolean> {
+    try {
+      // You can create a simple /api/auth/me endpoint to check authentication
+      await httpService.get("/api/auth/me");
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
 

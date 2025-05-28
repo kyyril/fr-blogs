@@ -33,36 +33,52 @@ export class BlogService {
 
   async createBlog(data: CreateBlogDto): Promise<Blog> {
     const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === "categories" || key === "tags") {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value);
-      }
-    });
 
-    return httpService.post<Blog>("/api/blogs", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-  }
-
-  async updateBlog(id: string, data: Partial<CreateBlogDto>): Promise<Blog> {
-    const formData = new FormData();
+    // Append fields individually with proper handling
     Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && value !== null) {
         if (key === "categories" || key === "tags") {
-          formData.append(key, JSON.stringify(value));
-        } else {
+          // Ensure arrays are properly stringified
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          }
+        } else if (key === "image" && value instanceof File) {
+          // Handle file upload
           formData.append(key, value);
+        } else {
+          // Handle other fields
+          formData.append(key, String(value));
         }
       }
     });
 
-    return httpService.put<Blog>(`/api/blogs/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    // Don't override Content-Type header - let browser set it automatically with boundary
+    return httpService.post<Blog>("/api/blogs", formData);
   }
 
+  async updateBlog(id: string, data: Partial<CreateBlogDto>): Promise<Blog> {
+    const formData = new FormData();
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (key === "categories" || key === "tags") {
+          // Ensure arrays are properly stringified
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          }
+        } else if (key === "image" && value instanceof File) {
+          // Handle file upload
+          formData.append(key, value);
+        } else {
+          // Handle other fields
+          formData.append(key, String(value));
+        }
+      }
+    });
+
+    // Don't override Content-Type header - let browser set it automatically with boundary
+    return httpService.put<Blog>(`/api/blogs/${id}`, formData);
+  }
   async deleteBlog(id: string): Promise<void> {
     return httpService.delete(`/api/blogs/${id}`);
   }

@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { tokenService } from "@/services/token.services";
 
 interface User {
   id: string;
@@ -43,7 +42,7 @@ const saveUserToStorage = (user: User | null): void => {
 };
 
 const initialState: AuthState = {
-  isAuthenticated: tokenService.isAuthenticated(),
+  isAuthenticated: false, // We'll check this via API call instead of token
   user: getUserFromStorage(),
 };
 

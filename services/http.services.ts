@@ -1,20 +1,46 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import { config } from "@/constants/config";
-import { tokenService } from "./token.services";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
-export class HttpService {
+class HttpService {
   private static instance: HttpService;
-  private readonly axiosInstance: AxiosInstance;
+  private api: AxiosInstance;
 
   private constructor() {
-    this.axiosInstance = axios.create({
-      baseURL: config.apiBaseUrl,
+    this.api = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
+      timeout: 10000,
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    this.setupInterceptors();
+    // Request interceptor to ensure credentials are sent
+    this.api.interceptors.request.use(
+      (config) => {
+        config.withCredentials = true;
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Response interceptor to handle authentication errors
+    this.api.interceptors.response.use(
+      (response: AxiosResponse) => response,
+      async (error) => {
+        if (error.response?.status === 401) {
+          // Token expired or invalid - clear auth state and redirect
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("user");
+
+            // Check if we're not already on the login page to avoid infinite redirects
+            if (window.location.pathname !== "/login") {
+              window.location.href = "/login";
+            }
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   public static getInstance(): HttpService {
@@ -24,32 +50,8 @@ export class HttpService {
     return HttpService.instance;
   }
 
-  private setupInterceptors(): void {
-    this.axiosInstance.interceptors.request.use(
-      (config) => {
-        const token = tokenService.getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-
-    this.axiosInstance.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          tokenService.removeToken();
-          window.location.href = "/login";
-        }
-        return Promise.reject(error);
-      }
-    );
-  }
-
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.axiosInstance.get<T>(url, config);
+    const response = await this.api.get<T>(url, config);
     return response.data;
   }
 
@@ -58,13 +60,8 @@ export class HttpService {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    try {
-      const response = await this.axiosInstance.post<T>(url, data, config);
-      return response.data;
-    } catch (error: any) {
-      console.error("POST error:", error.response?.data || error.message);
-      throw error;
-    }
+    const response = await this.api.post<T>(url, data, config);
+    return response.data;
   }
 
   async put<T>(
@@ -72,12 +69,21 @@ export class HttpService {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.axiosInstance.put<T>(url, data, config);
+    const response = await this.api.put<T>(url, data, config);
     return response.data;
   }
 
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.axiosInstance.delete<T>(url, config);
+    const response = await this.api.delete<T>(url, config);
+    return response.data;
+  }
+
+  async patch<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
+    const response = await this.api.patch<T>(url, data, config);
     return response.data;
   }
 }
