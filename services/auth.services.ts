@@ -29,6 +29,11 @@ export class AuthService {
         "/api/auth/google",
         {
           token: idToken,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
 
@@ -36,10 +41,6 @@ export class AuthService {
       return response;
     } catch (error: any) {
       console.error("Google login error:", error);
-      if (error.response) {
-        console.error("Error response:", error.response.data);
-        console.error("Error status:", error.response.status);
-      }
       throw error;
     }
   }
@@ -47,29 +48,53 @@ export class AuthService {
   async logout(): Promise<void> {
     try {
       await httpService.post("/api/auth/logout");
-
-      // Clear any stored user data
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("user");
-      }
-
-      // Redirect to login page
-      window.location.href = "/login";
     } catch (error) {
       console.error("Logout error:", error);
-      // Even if logout fails on server, clear local data and redirect
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("user");
-        window.location.href = "/login";
-      }
+      // Continue with logout even if server request fails
     }
   }
 
-  // Check if user is authenticated by making a request to a protected endpoint
+  // Get current user info (validates authentication)
+  async getMe(): Promise<LoginResponse> {
+    try {
+      const response = await httpService.get<LoginResponse>("/api/auth/me");
+      return response;
+    } catch (error: any) {
+      // If 401, try to refresh token
+      if (error.response?.status === 401) {
+        try {
+          const refreshResponse = await this.refreshToken();
+          // If refresh succeeds, try getMe again
+          const retryResponse = await httpService.get<LoginResponse>(
+            "/api/auth/me"
+          );
+          return retryResponse;
+        } catch (refreshError) {
+          console.error("Token refresh failed:", refreshError);
+          throw error; // Throw original error
+        }
+      }
+      throw error;
+    }
+  }
+
+  // Refresh access token using refresh token
+  async refreshToken(): Promise<LoginResponse> {
+    try {
+      const response = await httpService.post<LoginResponse>(
+        "/api/auth/refresh"
+      );
+      return response;
+    } catch (error) {
+      console.error("Refresh token error:", error);
+      throw error;
+    }
+  }
+
+  // Check if user is authenticated
   async checkAuth(): Promise<boolean> {
     try {
-      // You can create a simple /api/auth/me endpoint to check authentication
-      await httpService.get("/api/auth/me");
+      await this.getMe();
       return true;
     } catch (error) {
       return false;

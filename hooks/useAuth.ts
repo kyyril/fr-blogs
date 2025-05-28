@@ -17,14 +17,12 @@ export const useAuth = () => {
           credential
         );
 
-        // Dispatch the auth state to Redux
+        // Set auth state in Redux
         dispatch(setAuth({ user: response.user }));
 
-        // Return the response for the component to use
         return response;
       } catch (error) {
         console.error("Login failed:", error);
-        // Make sure to clear auth state on failure
         dispatch(clearAuth());
         throw error;
       }
@@ -35,40 +33,72 @@ export const useAuth = () => {
   const logout = useCallback(async () => {
     try {
       await authService.logout();
-      dispatch(clearAuth());
     } catch (error) {
       console.error("Logout failed:", error);
-      // Clear local state anyway
+    } finally {
+      // Always clear local state
       dispatch(clearAuth());
     }
   }, [dispatch]);
 
-  // Check authentication status on app load
+  // Initialize auth state from server
+  const initializeAuth = useCallback(async () => {
+    try {
+      const response = await authService.getMe();
+      dispatch(setAuth({ user: response.user }));
+    } catch (error) {
+      console.error("Auth initialization failed:", error);
+      dispatch(clearAuth());
+    }
+  }, [dispatch]);
+
+  // Check authentication status
   const checkAuth = useCallback(async () => {
     try {
-      const isAuth = await authService.checkAuth();
-      if (!isAuth && isAuthenticated) {
-        // If server says not authenticated but local state says yes, clear it
+      const response = await authService.getMe();
+
+      // Update Redux state if we got user data
+      if (response.user) {
+        dispatch(setAuth({ user: response.user }));
+        return true;
+      } else {
         dispatch(clearAuth());
+        return false;
       }
     } catch (error) {
       console.error("Auth check failed:", error);
-      if (isAuthenticated) {
-        dispatch(clearAuth());
-      }
+      dispatch(clearAuth());
+      return false;
     }
-  }, [dispatch, isAuthenticated]);
+  }, [dispatch]);
 
-  // Optional: Check auth status periodically
+  // Initialize authentication on hook mount
   useEffect(() => {
-    if (user) {
-      checkAuth();
+    initializeAuth();
+  }, [initializeAuth]);
 
-      // Set up periodic auth check (every 5 minutes)
-      const interval = setInterval(checkAuth, 5 * 60 * 1000);
-      return () => clearInterval(interval);
+  // Set up periodic auth check and token refresh
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isAuthenticated) {
+      // Check auth every 10 minutes
+      interval = setInterval(async () => {
+        try {
+          await authService.getMe();
+        } catch (error) {
+          console.error("Periodic auth check failed:", error);
+          dispatch(clearAuth());
+        }
+      }, 10 * 60 * 1000);
     }
-  }, [user, checkAuth]);
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isAuthenticated, dispatch]);
 
   return {
     isAuthenticated,
@@ -76,5 +106,6 @@ export const useAuth = () => {
     login,
     logout,
     checkAuth,
+    initializeAuth,
   };
 };

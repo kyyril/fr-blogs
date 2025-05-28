@@ -7,11 +7,7 @@ class HttpService {
   private constructor() {
     this.api = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
-      timeout: 10000,
       withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
 
     // Request interceptor to ensure credentials are sent
@@ -31,11 +27,6 @@ class HttpService {
           // Token expired or invalid - clear auth state and redirect
           if (typeof window !== "undefined") {
             localStorage.removeItem("user");
-
-            // Check if we're not already on the login page to avoid infinite redirects
-            if (window.location.pathname !== "/login") {
-              window.location.href = "/login";
-            }
           }
         }
         return Promise.reject(error);
