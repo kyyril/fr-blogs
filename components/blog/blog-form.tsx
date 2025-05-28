@@ -29,6 +29,7 @@ import { ImageUpload } from "@/components/blog/image-upload";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useBlog } from "@/hooks/useBlog"; // Import the blog hook
 
 const formSchema = z.object({
   title: z
@@ -53,13 +54,20 @@ type FormValues = z.infer<typeof formSchema>;
 interface BlogFormProps {
   initialData?: FormValues;
   isEditing?: boolean;
+  blogId?: string; // Add blogId for editing
 }
 
-export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
+export function BlogForm({
+  initialData,
+  isEditing = false,
+  blogId,
+}: BlogFormProps) {
   const router = useRouter();
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [tagInput, setTagInput] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Use the blog hook
+  const { createBlog, updateBlog } = useBlog();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -102,27 +110,36 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
   };
 
   const onSubmit = async (values: FormValues) => {
-    setIsSubmitting(true);
-
     try {
-      // Include tags in the submission
+      // Prepare the data for submission
       const dataToSubmit = {
         ...values,
         tags,
+        // Remove coverImage if it's empty string
+        ...(values.coverImage === "" && { coverImage: undefined }),
       };
 
-      // In a real app, this would be an API call
-      console.log("Submitting form data:", dataToSubmit);
+      if (isEditing && blogId) {
+        // Update existing blog
+        await updateBlog.mutateAsync({
+          id: blogId,
+          data: dataToSubmit,
+        });
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+        toast({
+          title: "Blog updated",
+          description: "Your blog has been updated successfully",
+        });
+      } else {
+        // Create new blog
+        // await createBlog.mutateAsync(dataToSubmit);
+        console.log(dataToSubmit);
 
-      toast({
-        title: isEditing ? "Blog updated" : "Blog created",
-        description: isEditing
-          ? "Your blog has been updated successfully"
-          : "Your blog has been published successfully",
-      });
+        toast({
+          title: "Blog created",
+          description: "Your blog has been published successfully",
+        });
+      }
 
       // Redirect to the blog page
       router.push("/blog");
@@ -130,14 +147,16 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
       console.error("Error submitting form:", error);
       toast({
         title: "An error occurred",
-        description:
-          "There was an error publishing your blog. Please try again.",
+        description: isEditing
+          ? "There was an error updating your blog. Please try again."
+          : "There was an error publishing your blog. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  // Get loading state from mutations
+  const isSubmitting = createBlog.isPending || updateBlog.isPending;
 
   return (
     <Form {...form}>
@@ -299,7 +318,9 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting
-              ? "Saving..."
+              ? isEditing
+                ? "Updating..."
+                : "Publishing..."
               : isEditing
               ? "Update Blog"
               : "Publish Blog"}

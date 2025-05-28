@@ -68,7 +68,7 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
     readTime: blog.readingTime,
     author: {
       name: blog.author?.name || "Anonymous",
-      image: blog.author?.avatar || "/default-avatar.png",
+      avatar: blog.author?.avatar || "/default-avatar.png",
     },
     stats: {
       likes: 0, // You can add likes functionality later
