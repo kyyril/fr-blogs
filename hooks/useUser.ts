@@ -1,12 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService, User } from '@/services/user.services';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { userService } from "@/services/user.services";
+import { User } from "@/lib/types/data.interface";
 
 export const useUser = () => {
   const queryClient = useQueryClient();
 
   const getProfile = (userId: string) => {
     return useQuery<User>({
-      queryKey: ['user', userId],
+      queryKey: ["user", userId],
       queryFn: () => userService.getProfile(userId),
     });
   };
@@ -14,14 +15,14 @@ export const useUser = () => {
   const followUser = useMutation({
     mutationFn: (userId: string) => userService.followUser(userId),
     onSuccess: (_, userId) => {
-      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      queryClient.invalidateQueries({ queryKey: ["user", userId] });
     },
   });
 
   const unfollowUser = useMutation({
     mutationFn: (userId: string) => userService.unfollowUser(userId),
     onSuccess: (_, userId) => {
-      queryClient.invalidateQueries({ queryKey: ['user', userId] });
+      queryClient.invalidateQueries({ queryKey: ["user", userId] });
     },
   });
 

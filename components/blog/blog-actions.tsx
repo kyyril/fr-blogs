@@ -1,16 +1,27 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Heart, Share2, Bookmark, MessageSquare, Copy, Twitter, Facebook, Linkedin, BookmarkCheck, FileHeart as HeartFilled } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import {
+  Heart,
+  Share2,
+  Bookmark,
+  MessageSquare,
+  Copy,
+  Twitter,
+  Facebook,
+  Linkedin,
+  BookmarkCheck,
+  FileHeart as HeartFilled,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Separator } from '@/components/ui/separator';
-import { toast } from '@/components/ui/toast';
+} from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/toast";
 
 interface BlogActionsProps {
   blog: {
@@ -27,7 +38,7 @@ interface BlogActionsProps {
 
 export function BlogActions({ blog }: BlogActionsProps) {
   const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(blog.stats.likes);
+  const [likes, setLikes] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const handleLike = () => {
@@ -44,18 +55,18 @@ export function BlogActions({ blog }: BlogActionsProps) {
     // In a real app, this would be an API call
     setIsBookmarked(!isBookmarked);
     toast({
-      title: isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks',
+      title: isBookmarked ? "Removed from bookmarks" : "Added to bookmarks",
       description: isBookmarked
-        ? 'This blog has been removed from your bookmarks'
-        : 'This blog has been added to your bookmarks',
+        ? "This blog has been removed from your bookmarks"
+        : "This blog has been added to your bookmarks",
     });
   };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(`https://blogify.com/blog/${blog.slug}`);
     toast({
-      title: 'Link copied',
-      description: 'The link has been copied to your clipboard',
+      title: "Link copied",
+      description: "The link has been copied to your clipboard",
     });
   };
 
@@ -87,10 +98,14 @@ export function BlogActions({ blog }: BlogActionsProps) {
         variant="outline"
         size="sm"
         className="gap-2"
-        onClick={() => document.querySelector('#comments')?.scrollIntoView({ behavior: 'smooth' })}
+        onClick={() =>
+          document
+            .querySelector("#comments")
+            ?.scrollIntoView({ behavior: "smooth" })
+        }
       >
         <MessageSquare className="h-4 w-4" />
-        <span>{blog.stats.comments}</span>
+        <span>{blog?.stats?.comments}</span>
       </Button>
 
       <Button
@@ -120,15 +135,15 @@ export function BlogActions({ blog }: BlogActionsProps) {
             <Copy className="mr-2 h-4 w-4" />
             <span>Copy link</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleShare('Twitter')}>
+          <DropdownMenuItem onClick={() => handleShare("Twitter")}>
             <Twitter className="mr-2 h-4 w-4" />
             <span>Twitter</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleShare('Facebook')}>
+          <DropdownMenuItem onClick={() => handleShare("Facebook")}>
             <Facebook className="mr-2 h-4 w-4" />
             <span>Facebook</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleShare('LinkedIn')}>
+          <DropdownMenuItem onClick={() => handleShare("LinkedIn")}>
             <Linkedin className="mr-2 h-4 w-4" />
             <span>LinkedIn</span>
           </DropdownMenuItem>
