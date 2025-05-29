@@ -26,9 +26,17 @@ export const useUser = () => {
     },
   });
 
+  const followStatus = useMutation({
+    mutationFn: (userId: string) => userService.followStatus(userId),
+    onSuccess: (_, userId) => {
+      queryClient.invalidateQueries({ queryKey: ["user", userId] });
+    },
+  });
+
   return {
     getProfile,
     followUser,
     unfollowUser,
+    followStatus,
   };
 };

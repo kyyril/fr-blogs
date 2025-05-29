@@ -24,6 +24,10 @@ export class UserService {
   async unfollowUser(userId: string): Promise<void> {
     return httpService.delete(`/api/users/${userId}/follow`);
   }
+
+  async followStatus(userId: string): Promise<void> {
+    return httpService.get(`/api/users/${userId}/follow-status`);
+  }
 }
 
 export const userService = UserService.getInstance();
