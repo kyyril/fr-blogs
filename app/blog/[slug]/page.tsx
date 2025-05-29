@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -59,11 +60,11 @@ export default async function BlogPage({ params }: BlogPageProps) {
   try {
     blog = await blogService.getBlogBySlug(params.slug);
   } catch (error) {
-    <NotFound />;
+    return <NotFound />;
   }
 
   if (!blog) {
-    <NotFound />;
+    return <NotFound />;
   }
 
   return (
@@ -88,20 +89,32 @@ export default async function BlogPage({ params }: BlogPageProps) {
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <div className="flex items-center gap-2">
-            <Avatar className="h-10 w-10">
-              <AvatarImage
-                src={blog.author.avatar || ""}
-                alt={blog.author.name}
-              />
-              <AvatarFallback>
-                {blog.author.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
+            <Link
+              href={`/profile/${blog.author.id}`}
+              className="hover:opacity-80 transition-opacity"
+            >
+              <Avatar className="h-10 w-10 cursor-pointer">
+                <AvatarImage
+                  src={blog.author.avatar || ""}
+                  alt={blog.author.name}
+                />
+                <AvatarFallback>
+                  {blog.author.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
             <div className="text-left">
-              <p className="text-sm font-medium">{blog.author.name}</p>
+              <Link
+                href={`/profile/${blog.author.id}`}
+                className="hover:text-primary transition-colors"
+              >
+                <p className="text-sm font-medium cursor-pointer">
+                  {blog.author.name}
+                </p>
+              </Link>
               <p className="text-xs text-muted-foreground">Author</p>
             </div>
           </div>

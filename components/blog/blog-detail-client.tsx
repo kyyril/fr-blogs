@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { BlogActions } from "@/components/blog/blog-actions";
@@ -8,6 +9,9 @@ import { BlogComments } from "@/components/blog/blog-comments";
 import { RelatedBlogs } from "@/components/blog/related-blogs";
 import { Blog } from "@/lib/types/data.interface";
 import { useBlog } from "@/hooks/useBlog";
+import { useUser } from "@/hooks/useUser";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 interface BlogDetailClientProps {
   blog: Blog;
@@ -15,11 +19,49 @@ interface BlogDetailClientProps {
 
 export function BlogDetailClient({ blog }: BlogDetailClientProps) {
   const { recordView } = useBlog();
+  const { followUser, unfollowUser, followStatus } = useUser();
+  const { user: currentUser } = useAuth();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followStatusLoading, setFollowStatusLoading] = useState(false);
 
   useEffect(() => {
     // Record blog view when component mounts
     recordView.mutate(blog.id);
   }, [blog.id]);
+
+  // Check follow status for the blog author
+  useEffect(() => {
+    if (currentUser && blog.author.id !== currentUser.id) {
+      setFollowStatusLoading(true);
+      followStatus.mutate(blog.author.id, {
+        onSuccess: (data: any) => {
+          setIsFollowing(data.is_following);
+          setFollowStatusLoading(false);
+        },
+        onError: () => {
+          setFollowStatusLoading(false);
+        },
+      });
+    }
+  }, [currentUser, blog.author.id]);
+
+  const handleFollowToggle = async () => {
+    if (!currentUser) return;
+
+    try {
+      if (isFollowing) {
+        await unfollowUser.mutateAsync(blog.author.id);
+        setIsFollowing(false);
+      } else {
+        await followUser.mutateAsync(blog.author.id);
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Error toggling follow status:", error);
+    }
+  };
+
+  const isOwnBlog = currentUser?.id === blog.author.id;
 
   return (
     <>
@@ -42,27 +84,70 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
       {/* Author Bio */}
       <div className="mb-12 rounded-lg bg-muted p-6">
         <div className="flex flex-col items-start gap-4 sm:flex-row">
-          <Avatar className="h-16 w-16">
-            <AvatarImage
-              src={blog.author.avatar || ""}
-              alt={blog.author.name}
-            />
-            <AvatarFallback className="text-lg">
-              {blog.author.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </AvatarFallback>
-          </Avatar>
+          <Link
+            href={`/profile/${blog.author.id}`}
+            className="hover:opacity-80 transition-opacity"
+          >
+            <Avatar className="h-16 w-16 cursor-pointer">
+              <AvatarImage
+                src={blog.author.avatar || ""}
+                alt={blog.author.name}
+              />
+              <AvatarFallback className="text-lg">
+                {blog.author.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+
           <div className="flex-1">
-            <h3 className="mb-1 text-lg font-semibold">{blog.author.name}</h3>
+            <Link
+              href={`/profile/${blog.author.id}`}
+              className="hover:text-primary transition-colors"
+            >
+              <h3 className="mb-1 text-lg font-semibold cursor-pointer">
+                {blog.author.name}
+              </h3>
+            </Link>
+
             <p className="mb-3 text-muted-foreground">
               {blog.author.bio ||
                 `${blog.author.name} is a passionate writer and contributor to our blog community. Follow for more insightful content and updates.`}
             </p>
-            <Button variant="outline" size="sm">
-              Follow
-            </Button>
+
+            <div className="flex items-center gap-3">
+              {/* Follow/Unfollow Button */}
+              {!isOwnBlog && currentUser && (
+                <Button
+                  variant={isFollowing ? "outline" : "default"}
+                  size="sm"
+                  onClick={handleFollowToggle}
+                  disabled={
+                    followUser.isPending ||
+                    unfollowUser.isPending ||
+                    followStatusLoading
+                  }
+                >
+                  {followUser.isPending || unfollowUser.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {followStatusLoading
+                    ? "Loading..."
+                    : isFollowing
+                    ? "Unfollow"
+                    : "Follow"}
+                </Button>
+              )}
+
+              {/* View Profile Button */}
+              <Link href={`/profile/${blog.author.id}`}>
+                <Button variant="outline" size="sm">
+                  View Profile
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -1,13 +1,18 @@
-import { Metadata } from 'next';
-import Image from 'next/image';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BlogList } from '@/components/blog/blog-list';
-import { UserFollowers } from '@/components/profile/user-followers';
-import { UserFollowing } from '@/components/profile/user-following';
-import { mockUser } from '@/lib/mock-data';
-import { Twitter, Github, Linkedin } from 'lucide-react';
+"use client";
+
+import { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BlogList } from "@/components/blog/blog-list";
+import { UserFollowers } from "@/components/profile/user-followers";
+import { UserFollowing } from "@/components/profile/user-following";
+import { useUser } from "@/hooks/useUser";
+import { Twitter, Github, Linkedin, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth"; // Assuming you have auth context
+import { useEffect, useState } from "react";
 
 interface ProfilePageProps {
   params: {
@@ -15,21 +20,73 @@ interface ProfilePageProps {
   };
 }
 
-export async function generateMetadata({
-  params,
-}: ProfilePageProps): Promise<Metadata> {
-  // In a real app, fetch this data from an API
-  const user = mockUser;
-
-  return {
-    title: `${user.name}'s Profile - Blogify`,
-    description: `Check out ${user.name}'s profile and blogs on Blogify`,
-  };
-}
-
 export default function ProfilePage({ params }: ProfilePageProps) {
-  // In a real app, fetch this data from an API
-  const user = mockUser;
+  const { getProfile, followUser, unfollowUser, followStatus } = useUser();
+  const { user: currentUser } = useAuth(); // Get current logged-in user
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followStatusLoading, setFollowStatusLoading] = useState(false);
+
+  const { data: user, isLoading, error } = getProfile(params.userId);
+
+  // Check follow status when component mounts
+  useEffect(() => {
+    if (currentUser && params.userId !== currentUser.id) {
+      setFollowStatusLoading(true);
+      followStatus.mutate(params.userId, {
+        onSuccess: (data: any) => {
+          setIsFollowing(data.is_following);
+          setFollowStatusLoading(false);
+        },
+        onError: () => {
+          setFollowStatusLoading(false);
+        },
+      });
+    }
+  }, [currentUser, params.userId]);
+
+  const handleFollowToggle = async () => {
+    if (!currentUser) return;
+
+    try {
+      if (isFollowing) {
+        await unfollowUser.mutateAsync(params.userId);
+        setIsFollowing(false);
+      } else {
+        await followUser.mutateAsync(params.userId);
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Error toggling follow status:", error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">User Not Found</h1>
+          <p className="text-muted-foreground">
+            The user you're looking for doesn't exist or has been removed.
+          </p>
+          <Link href="/">
+            <Button className="mt-4">Go Home</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const isOwnProfile = currentUser?.id === params.userId;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -43,54 +100,104 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         <div className="relative flex flex-col items-center text-center sm:flex-row sm:text-left">
           <div className="absolute -top-16 sm:-top-20">
             <Avatar className="h-32 w-32 border-4 border-background sm:h-40 sm:w-40">
-              <AvatarImage src={user.image} alt={user.name} />
+              <AvatarImage src={user.avatar} alt={user.name} />
               <AvatarFallback>{user.name[0]}</AvatarFallback>
             </Avatar>
           </div>
-          
+
           <div className="mt-16 w-full sm:mt-0 sm:ml-44">
             <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
               <div>
                 <h1 className="text-2xl font-bold md:text-3xl">{user.name}</h1>
                 <p className="text-muted-foreground">{user.email}</p>
               </div>
-              <Button>Follow</Button>
+
+              {/* Follow/Edit Button */}
+              {!isOwnProfile && currentUser && (
+                <Button
+                  onClick={handleFollowToggle}
+                  disabled={
+                    followUser.isPending ||
+                    unfollowUser.isPending ||
+                    followStatusLoading
+                  }
+                  variant={isFollowing ? "outline" : "default"}
+                >
+                  {followUser.isPending || unfollowUser.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {followStatusLoading
+                    ? "Loading..."
+                    : isFollowing
+                    ? "Unfollow"
+                    : "Follow"}
+                </Button>
+              )}
+
+              {isOwnProfile && (
+                <Link href="/profile/edit">
+                  <Button variant="outline">Edit Profile</Button>
+                </Link>
+              )}
             </div>
-            
-            <p className="mt-4">{user.bio}</p>
-            
+
+            {user.bio && <p className="mt-4">{user.bio}</p>}
+
             <div className="mt-4 flex items-center justify-center gap-6 sm:justify-start">
               <div className="text-center">
-                <p className="text-xl font-bold">{user.stats.blogs}</p>
+                <p className="text-xl font-bold">{user._count.blogs}</p>
                 <p className="text-sm text-muted-foreground">Blogs</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{user.stats.followers}</p>
+                <p className="text-xl font-bold">{user._count.followers}</p>
                 <p className="text-sm text-muted-foreground">Followers</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{user.stats.following}</p>
+                <p className="text-xl font-bold">{user._count.following}</p>
                 <p className="text-sm text-muted-foreground">Following</p>
               </div>
             </div>
-            
-            <div className="mt-4 flex items-center justify-center gap-2 sm:justify-start">
-              <Button variant="ghost" size="icon" asChild>
-                <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
-                  <Twitter className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer">
-                  <Github className="h-5 w-5" />
-                </a>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
-                  <Linkedin className="h-5 w-5" />
-                </a>
-              </Button>
-            </div>
+
+            {/* Social Links - Add these fields to your User interface if needed */}
+            {(user.socialLinks?.twitter ||
+              user.socialLinks?.github ||
+              user.socialLinks?.linkedin) && (
+              <div className="mt-4 flex items-center justify-center gap-2 sm:justify-start">
+                {user.socialLinks?.twitter && (
+                  <Button variant="ghost" size="icon" asChild>
+                    <a
+                      href={user.socialLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Twitter className="h-5 w-5" />
+                    </a>
+                  </Button>
+                )}
+                {user.socialLinks?.github && (
+                  <Button variant="ghost" size="icon" asChild>
+                    <a
+                      href={user.socialLinks.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Github className="h-5 w-5" />
+                    </a>
+                  </Button>
+                )}
+                {user.socialLinks?.linkedin && (
+                  <Button variant="ghost" size="icon" asChild>
+                    <a
+                      href={user.socialLinks.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Linkedin className="h-5 w-5" />
+                    </a>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -103,7 +210,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <TabsTrigger value="following">Following</TabsTrigger>
         </TabsList>
         <TabsContent value="blogs" className="mt-6">
-          <BlogList />
+          <UserBlogList blogs={user.blogs} />
         </TabsContent>
         <TabsContent value="followers" className="mt-6">
           <UserFollowers userId={params.userId} />
@@ -112,6 +219,50 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <UserFollowing userId={params.userId} />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+// Component to display user's blogs
+function UserBlogList({ blogs }: { blogs: any[] }) {
+  if (!blogs || blogs.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No blogs published yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {blogs.map((blog) => (
+        <div
+          key={blog.id}
+          className="group cursor-pointer rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
+        >
+          <Link href={`/blog/${blog.slug}`}>
+            <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
+              <Image
+                src={blog.image}
+                alt={blog.title}
+                fill
+                className="object-cover transition-transform group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
+            <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
+              {blog.title}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+              {blog.description}
+            </p>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{new Date(blog.date).toLocaleDateString()}</span>
+              <span>{blog.readingTime} min read</span>
+            </div>
+          </Link>
+        </div>
+      ))}
     </div>
   );
 }
