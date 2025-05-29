@@ -19,7 +19,7 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
   useEffect(() => {
     // Record blog view when component mounts
     recordView.mutate(blog.id);
-  }, [blog.id, recordView]);
+  }, [blog.id]);
 
   return (
     <>
