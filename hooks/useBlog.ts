@@ -16,12 +16,21 @@ export const useBlog = () => {
     });
   };
 
-  const getBlogBySlug = (slug: string) => {
+  // Add getBlogById for editing
+  const getBlogBySlug = (slug: string, options?: { enabled?: boolean }) => {
     return useQuery<Blog>({
-      queryKey: ["blog", slug],
+      queryKey: ["blog", "slug", slug],
       queryFn: () => blogService.getBlogBySlug(slug),
+      enabled: options?.enabled !== false && !!slug,
     });
   };
+
+  // const getBlogBySlug = (slug: string) => {
+  //   return useQuery<Blog>({
+  //     queryKey: ["blog", slug],
+  //     queryFn: () => blogService.getBlogBySlug(slug),
+  //   });
+  // };
 
   const searchBlogs = (query: string, page = 1, limit = 10) => {
     return useQuery<BlogsResponse>({

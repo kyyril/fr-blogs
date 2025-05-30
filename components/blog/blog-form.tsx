@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,20 +17,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BlogEditor } from "@/components/blog/editor";
-import { ImageUpload } from "@/components/blog/image-upload";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useBlog } from "@/hooks/useBlog"; // Import the blog hook
+import { useBlog } from "@/hooks/useBlog";
 
 const formSchema = z.object({
   title: z
@@ -52,39 +44,69 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface BlogFormProps {
-  initialData?: Partial<FormValues>;
+  slug?: string;
   isEditing?: boolean;
-  blogId?: string; // Add blogId for editing
 }
 
-export function BlogForm({
-  initialData,
-  isEditing = false,
-  blogId,
-}: BlogFormProps) {
+export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
   const router = useRouter();
-  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
+  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [categories, setCategories] = useState<string[]>(
-    initialData?.categories || []
-  );
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Use the blog hook
-  const { createBlog, updateBlog } = useBlog();
+  // Use the blog hooks
+  const { createBlog, updateBlog, getBlogBySlug } = useBlog();
+
+  // Fetch blog data for editing
+  const {
+    data: blogData,
+    isLoading: isFetchingBlog,
+    error: fetchError,
+  } = getBlogBySlug(slug || "", { enabled: isEditing && !!slug });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: initialData?.title || "",
-      description: initialData?.description || "",
-      content: initialData?.content || "",
-      image: undefined, // File objects can't have default values
-      categories: initialData?.categories || [],
-      tags: initialData?.tags || [],
-      readingTime: initialData?.readingTime || 1,
-      featured: initialData?.featured || false,
+      title: "",
+      description: "",
+      content: "",
+      image: undefined,
+      categories: [],
+      tags: [],
+      readingTime: 1,
+      featured: false,
     },
   });
+
+  // Populate form when editing and data is loaded
+  useEffect(() => {
+    if (isEditing && blogData) {
+      const initialData = {
+        title: blogData.title || "",
+        description: blogData.description || "",
+        content: blogData.content || "",
+        readingTime: blogData.readingTime || 1,
+        featured: blogData.featured || false,
+      };
+
+      // Set form values
+      Object.entries(initialData).forEach(([key, value]) => {
+        form.setValue(key as keyof FormValues, value);
+      });
+
+      // Set categories and tags
+      if (blogData.categories) {
+        setCategories(blogData.categories);
+        form.setValue("categories", blogData.categories);
+      }
+
+      if (blogData.tags) {
+        setTags(blogData.tags);
+        form.setValue("tags", blogData.tags);
+      }
+    }
+  }, [blogData, isEditing, form]);
 
   const availableCategories = [
     "Programming",
@@ -145,8 +167,9 @@ export function BlogForm({
   };
 
   const onSubmit = async (values: FormValues) => {
+    setIsLoading(true);
     try {
-      // Prepare data object first
+      // Prepare data object
       const dataToSubmit = {
         title: values.title,
         description: values.description,
@@ -158,44 +181,73 @@ export function BlogForm({
         ...(values.image && { image: values.image }),
       };
 
-      if (isEditing && blogId) {
+      if (isEditing && slug) {
+        const id = blogData?.id;
         // Update existing blog
         await updateBlog.mutateAsync({
-          id: blogId,
+          id,
           data: dataToSubmit,
         });
 
         toast({
-          title: "Blog updated",
-          description: "Your blog has been updated successfully",
+          title: "Blog updated successfully",
+          description: "Your blog has been updated and saved.",
         });
       } else {
         // Create new blog
-        console.log("Data to submit:", dataToSubmit);
         await createBlog.mutateAsync(dataToSubmit);
 
         toast({
-          title: "Blog created",
-          description: "Your blog has been published successfully",
+          title: "Blog published successfully",
+          description: "Your blog has been published and is now live.",
         });
       }
 
-      // Redirect to the blog page
+      // Redirect to blog list or blog detail
       router.push("/blog");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error);
       toast({
-        title: "An error occurred",
-        description: isEditing
-          ? "There was an error updating your blog. Please try again."
-          : "There was an error publishing your blog. Please try again.",
+        title: "Error occurred",
+        description:
+          error?.message ||
+          (isEditing
+            ? "Failed to update your blog. Please try again."
+            : "Failed to publish your blog. Please try again."),
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Show loading state when fetching blog data for editing
+  if (isEditing && isFetchingBlog) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Loading blog data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if failed to fetch blog data
+  if (isEditing && fetchError) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-destructive mb-4">Failed to load blog data</p>
+        <Button onClick={() => router.back()} variant="outline">
+          Go Back
+        </Button>
+      </div>
+    );
+  }
+
   // Get loading state from mutations
-  const isSubmitting = createBlog.isPending || updateBlog.isPending;
+  const isSubmitting =
+    createBlog.isPending || updateBlog.isPending || isLoading;
 
   return (
     <Form {...form}>
@@ -245,7 +297,7 @@ export function BlogForm({
           )}
         />
 
-        {/* Description (formerly Excerpt) */}
+        {/* Description */}
         <FormField
           control={form.control}
           name="description"
@@ -267,7 +319,7 @@ export function BlogForm({
           )}
         />
 
-        {/* Categories (Multiple Selection) */}
+        {/* Categories */}
         <FormField
           control={form.control}
           name="categories"
@@ -413,49 +465,27 @@ export function BlogForm({
           )}
         />
 
+        {/* Action Buttons */}
         <div className="flex gap-4">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
-          </Button>
           <Button
             type="button"
-            variant="secondary"
-            onClick={() => {
-              console.log("=== TOKEN DEBUG ===");
-              const token = document.cookie;
-              console.log("All cookies:", token);
-
-              // Check if useBlog hook has the token
-              console.log("Auth state from hook:", typeof createBlog);
-
-              // Manual token check
-              import("js-cookie").then((Cookies) => {
-                const rawToken = Cookies.default.get("auth_token");
-                console.log("Raw auth token:", rawToken);
-                if (rawToken) {
-                  try {
-                    const decoded = atob(rawToken);
-                    console.log(
-                      "Decoded token:",
-                      decoded.substring(0, 50) + "..."
-                    );
-                  } catch (e) {
-                    console.log("Token decode error:", e);
-                  }
-                }
-              });
-            }}
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
           >
-            Debug Token
+            Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting
-              ? isEditing
-                ? "Updating..."
-                : "Publishing..."
-              : isEditing
-              ? "Update Blog"
-              : "Publish Blog"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isEditing ? "Updating..." : "Publishing..."}
+              </>
+            ) : isEditing ? (
+              "Update Blog"
+            ) : (
+              "Publish Blog"
+            )}
           </Button>
         </div>
       </form>

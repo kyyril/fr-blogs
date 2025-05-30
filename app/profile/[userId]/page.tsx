@@ -10,7 +10,7 @@ import { BlogList } from "@/components/blog/blog-list";
 import { UserFollowers } from "@/components/profile/user-followers";
 import { UserFollowing } from "@/components/profile/user-following";
 import { useUser } from "@/hooks/useUser";
-import { Twitter, Github, Linkedin, Loader2 } from "lucide-react";
+import { Twitter, Github, Linkedin, Loader2, PenIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth"; // Assuming you have auth context
 import { useEffect, useState } from "react";
 
@@ -240,27 +240,30 @@ function UserBlogList({ blogs }: { blogs: any[] }) {
           key={blog.id}
           className="group cursor-pointer rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
         >
+          <Link href={`/blog/edit/${blog.slug}`}>
+            <PenIcon />
+          </Link>
+          <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
+            <Image
+              src={blog.image}
+              alt={blog.title}
+              fill
+              className="object-cover transition-transform group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </div>
           <Link href={`/blog/${blog.slug}`}>
-            <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
-              <Image
-                src={blog.image}
-                alt={blog.title}
-                fill
-                className="object-cover transition-transform group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-            </div>
             <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
               {blog.title}
             </h3>
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-              {blog.description}
-            </p>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{new Date(blog.date).toLocaleDateString()}</span>
-              <span>{blog.readingTime} min read</span>
-            </div>
           </Link>
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+            {blog.description}
+          </p>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{new Date(blog.date).toLocaleDateString()}</span>
+            <span>{blog.readingTime} min read</span>
+          </div>
         </div>
       ))}
     </div>

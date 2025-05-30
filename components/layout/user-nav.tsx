@@ -41,7 +41,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link
-              href="/profile"
+              href={`/profile/${user?.id}`}
               className="flex w-full cursor-pointer items-center"
             >
               <User className="mr-2 h-4 w-4" />
