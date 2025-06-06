@@ -77,10 +77,10 @@ export class BlogService {
     });
 
     // Don't override Content-Type header - let browser set it automatically with boundary
-    return httpService.put<Blog>(`/api/blogs/${id}`, formData);
+    return httpService.put<Blog>(`/api/blogs/blog/${id}`, formData);
   }
   async deleteBlog(id: string): Promise<void> {
-    return httpService.delete(`/api/blogs/${id}`);
+    return httpService.delete(`/api/blogs/blog/${id}`);
   }
 
   async getBlogs(page = 1, limit = 10): Promise<BlogsResponse> {
@@ -89,8 +89,12 @@ export class BlogService {
     );
   }
 
-  async getBlogBySlug(slug: string): Promise<Blog> {
-    return httpService.get<Blog>(`/api/blogs/${slug}`);
+  // async getBlogBySlug(slug: string): Promise<Blog> {
+  //   return httpService.get<Blog>(`/api/blogs/${slug}`);
+  // }
+
+  async getBlogById(id: string): Promise<Blog> {
+    return httpService.get<Blog>(`/api/blogs/blog/${id}`);
   }
 
   async searchBlogs(
@@ -114,7 +118,7 @@ export class BlogService {
   }
 
   async recordView(id: string): Promise<void> {
-    return httpService.post(`/api/blogs/${id}/view`);
+    return httpService.post(`/api/blogs/blog/${id}/view`);
   }
 }
 

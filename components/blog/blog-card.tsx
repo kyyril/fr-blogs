@@ -44,7 +44,7 @@ export function BlogCard({ blog, featured = false }: BlogCardProps) {
       <div
         className={`relative ${featured ? "h-48 md:h-auto md:w-2/5" : "h-48"}`}
       >
-        <Link href={`/blog/${blog.slug}`}>
+        <Link href={`/blog/${blog.id}`}>
           <Image
             src={blog.coverImage}
             alt={blog.title}
@@ -71,7 +71,7 @@ export function BlogCard({ blog, featured = false }: BlogCardProps) {
             <span>•</span>
             <span>{blog.readTime} min read</span>
           </div>
-          <Link href={`/blog/${blog.slug}`} className="group">
+          <Link href={`/blog/${blog.id}`} className="group">
             <h3 className="line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
               {blog.title}
             </h3>

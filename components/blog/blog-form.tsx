@@ -56,14 +56,14 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Use the blog hooks
-  const { createBlog, updateBlog, getBlogBySlug } = useBlog();
+  const { createBlog, updateBlog, getBlogById } = useBlog();
 
   // Fetch blog data for editing
   const {
     data: blogData,
     isLoading: isFetchingBlog,
     error: fetchError,
-  } = getBlogBySlug(slug || "", { enabled: isEditing && !!slug });
+  } = getBlogById(slug || "", { enabled: isEditing && !!slug });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

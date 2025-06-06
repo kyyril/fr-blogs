@@ -150,11 +150,11 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold">{user._count.followers}</p>
-                <p className="text-sm text-muted-foreground">Followers</p>
+                <p className="text-sm text-muted-foreground">Following</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold">{user._count.following}</p>
-                <p className="text-sm text-muted-foreground">Following</p>
+                <p className="text-sm text-muted-foreground">Followers</p>
               </div>
             </div>
 
@@ -225,6 +225,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
 // Component to display user's blogs
 function UserBlogList({ blogs }: { blogs: any[] }) {
+  const { user: currentUser } = useAuth(); // Add this at the top
+
   if (!blogs || blogs.length === 0) {
     return (
       <div className="text-center py-8">
@@ -238,11 +240,17 @@ function UserBlogList({ blogs }: { blogs: any[] }) {
       {blogs.map((blog) => (
         <div
           key={blog.id}
-          className="group cursor-pointer rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
+          className="group relative rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
         >
-          <Link href={`/blog/edit/${blog.slug}`}>
-            <PenIcon />
-          </Link>
+          {currentUser?.id === blog.authorId && (
+            <div className="absolute right-4 top-4 z-10">
+              <Link href={`/blog/edit/${blog.id}`}>
+                <div className="rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background">
+                  <PenIcon className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                </div>
+              </Link>
+            </div>
+          )}
           <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
             <Image
               src={blog.image}
@@ -252,7 +260,7 @@ function UserBlogList({ blogs }: { blogs: any[] }) {
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
-          <Link href={`/blog/${blog.slug}`}>
+          <Link href={`/blog/${blog.id}`}>
             <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
               {blog.title}
             </h3>

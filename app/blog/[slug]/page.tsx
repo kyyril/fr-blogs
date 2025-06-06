@@ -10,16 +10,18 @@ import { BlogDetailClient } from "@/components/blog/blog-detail-client";
 import NotFound from "@/components/blog/not-found";
 
 interface BlogPageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }> | { slug: string };
 }
 
 export async function generateMetadata({
   params,
-}: BlogPageProps): Promise<Metadata> {
+}: {
+  params: Promise<{ slug: string }> | { slug: string };
+}): Promise<Metadata> {
   try {
-    const blog = await blogService.getBlogBySlug(params.slug);
+    const resolvedParams = await params;
+    const blog = await blogService.getBlogById(resolvedParams.slug);
+    console.log("Generating metadata for blog:", blog);
 
     return {
       title: `${blog.title} - Blogify`,
@@ -54,11 +56,17 @@ export async function generateMetadata({
   }
 }
 
-export default async function BlogPage({ params }: BlogPageProps) {
+export default async function BlogPage({
+  params,
+}: {
+  params: Promise<{ slug: string }> | { slug: string };
+}) {
   let blog;
 
   try {
-    blog = await blogService.getBlogBySlug(params.slug);
+    const resolvedParams = await params;
+    blog = await blogService.getBlogById(resolvedParams.slug);
+    console.log("Blog metadata:", blog);
   } catch (error) {
     return <NotFound />;
   }
