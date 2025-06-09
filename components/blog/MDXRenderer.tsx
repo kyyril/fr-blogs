@@ -12,6 +12,26 @@ import {
 import { Copy, Check, ExternalLink, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Update the animation variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 15 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3 },
+  },
+};
+
+const codeBlockVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 25 },
+  },
+};
 
 interface MDXRendererProps {
   content: string;
@@ -43,45 +63,67 @@ export function MDXRenderer({ content }: MDXRendererProps) {
   };
 
   return (
-    <div className="prose prose-neutral dark:prose-invert max-w-none prose-lg">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="prose prose-neutral dark:prose-invert max-w-none prose-lg"
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeSlug]}
         components={{
+          // Basic text styling
+          p: ({ children, ...props }) => (
+            <p
+              className="leading-7 text-foreground/70 [&:not(:first-child)]:mt-6"
+              {...props}
+            >
+              {children}
+            </p>
+          ),
+
+          // Clean heading styles
           h1: ({ children, ...props }) => (
             <h1
-              className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary to-purple-600 border-b border-gradient-to-r from-primary/20 to-transparent pb-4"
+              className="text-4xl font-bold mb-8 text-foreground border-b border-border/20 pb-4"
               {...props}
             >
               {children}
             </h1>
           ),
           h2: ({ children, ...props }) => (
-            <h2
-              className="text-3xl font-semibold mt-16 mb-6 text-foreground scroll-mt-20 flex items-center gap-3 group"
+            <motion.h2
+              variants={fadeInUp}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              className="text-3xl font-bold mt-16 mb-6 text-foreground/90 scroll-mt-20 flex items-center gap-3"
               {...props}
             >
-              <div className="w-1 h-8 bg-gradient-to-b from-primary to-purple-500 rounded-full opacity-80 group-hover:opacity-100 transition-opacity"></div>
+              <div className="w-1 h-8 bg-primary/60 rounded-full"></div>
               {children}
-            </h2>
+            </motion.h2>
           ),
           h3: ({ children, ...props }) => (
             <h3
-              className="text-2xl font-semibold mt-12 mb-4 text-foreground scroll-mt-20 flex items-center gap-2"
+              className="text-2xl font-semibold mt-12 mb-4 text-foreground/80 scroll-mt-20 flex items-center gap-2"
               {...props}
             >
-              <Sparkles className="h-5 w-5 text-primary/70" />
+              <div className="w-1 h-6 bg-primary/40 rounded-full"></div>
               {children}
             </h3>
           ),
           h4: ({ children, ...props }) => (
             <h4
-              className="text-xl font-semibold mt-8 mb-3 text-foreground scroll-mt-20 border-l-2 border-primary/30 pl-4"
+              className="text-xl font-semibold mt-8 mb-3 text-foreground/80 scroll-mt-20 border-l-2 border-primary/30 pl-4"
               {...props}
             >
               {children}
             </h4>
           ),
+
+          // Clean code block
           code: ({ node, inline, className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || "");
             const language = match ? match[1] : "";
@@ -89,15 +131,15 @@ export function MDXRenderer({ content }: MDXRendererProps) {
 
             if (!inline && match) {
               return (
-                <div className="relative group my-8 rounded-xl overflow-hidden shadow-lg border border-primary/10">
-                  <div className="flex items-center justify-between bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 px-6 py-3 border-b border-slate-700">
+                <motion.div
+                  variants={codeBlockVariants}
+                  initial="initial"
+                  animate="animate"
+                  className="relative group my-8 rounded-lg overflow-hidden border border-border/30 dark:border-white/10"
+                >
+                  <div className="flex items-center justify-between px-4 py-2 border-b border-border/30 dark:border-white/10">
                     <div className="flex items-center gap-3">
-                      <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                        <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                        <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                      </div>
-                      <span className="text-sm font-medium text-slate-300 bg-slate-700/50 px-3 py-1 rounded-full">
+                      <span className="text-xs font-medium text-foreground/50">
                         {language}
                       </span>
                     </div>
@@ -105,129 +147,134 @@ export function MDXRenderer({ content }: MDXRendererProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleCopyCode(code)}
-                      className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-slate-300 hover:text-white hover:bg-slate-700/50"
+                      className="opacity-0 group-hover:opacity-100 transition-all"
                     >
                       {copiedCode === code ? (
-                        <Check className="h-4 w-4 text-green-400" />
+                        <Check className="h-4 w-4 text-primary" />
                       ) : (
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-4 w-4 text-foreground/50" />
                       )}
                     </Button>
                   </div>
                   <SyntaxHighlighter
-                    style={isDark ? oneDark : oneLight}
+                    style={
+                      isDark
+                        ? {
+                            ...oneDark,
+                            comment: {
+                              color: "#8b949e",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                            prolog: {
+                              color: "#8b949e",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                            doctype: {
+                              color: "#8b949e",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                            cdata: {
+                              color: "#8b949e",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                          }
+                        : {
+                            ...oneLight,
+                            comment: {
+                              color: "#6e7781",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                            prolog: {
+                              color: "#6e7781",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                            doctype: {
+                              color: "#6e7781",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                            cdata: {
+                              color: "#6e7781",
+                              fontStyle: "italic",
+                              background: "transparent",
+                            },
+                          }
+                    }
                     language={language}
                     PreTag="div"
                     className="!mt-0 !rounded-none !border-none"
                     customStyle={{
                       margin: 0,
-                      borderRadius: 0,
-                      background: isDark ? "#0f172a" : "#f8fafc",
-                      padding: "1.5rem",
+                      background: "transparent",
+                      padding: "1.25rem",
+                      fontSize: "0.9rem",
+                      lineHeight: "1.5",
                     }}
                     {...props}
                   >
                     {code}
                   </SyntaxHighlighter>
-                </div>
+                </motion.div>
               );
             }
 
             return (
-              <code
-                className="px-2 py-1 rounded-md bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary font-mono text-sm border border-primary/20"
-                {...props}
-              >
+              <code className="font-mono text-[0.9em] text-primary" {...props}>
                 {children}
               </code>
             );
           },
+
+          // Simplified blockquote
           blockquote: ({ children, ...props }) => (
-            <blockquote
-              className="border-l-4 border-gradient-to-b from-primary to-purple-500 pl-8 py-4 my-8 bg-gradient-to-r from-primary/5 via-primary/3 to-transparent rounded-r-xl italic relative overflow-hidden"
-              {...props}
-            >
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-primary/5 to-transparent opacity-50"></div>
-              <div className="relative z-10">{children}</div>
-            </blockquote>
-          ),
-          table: ({ children, ...props }) => (
-            <div className="overflow-x-auto my-8 rounded-xl border border-primary/10 shadow-sm">
-              <table
-                className="min-w-full border-collapse bg-gradient-to-br from-card to-primary/5"
-                {...props}
-              >
-                {children}
-              </table>
-            </div>
-          ),
-          th: ({ children, ...props }) => (
-            <th
-              className="border-b border-primary/20 bg-gradient-to-r from-primary/10 to-purple-500/10 px-6 py-4 text-left font-semibold text-foreground"
+            <motion.blockquote
+              variants={fadeInUp}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true }}
+              className="my-8 border-l-2 border-primary/30 pl-6 py-3 text-foreground/60 italic"
               {...props}
             >
               {children}
-            </th>
+            </motion.blockquote>
           ),
-          td: ({ children, ...props }) => (
-            <td
-              className="border-b border-border/50 px-6 py-4 text-foreground"
-              {...props}
-            >
-              {children}
-            </td>
-          ),
+
+          // Cleaner link style
           a: ({ children, href, ...props }) => (
             <a
               href={href}
-              className="text-primary hover:text-purple-600 underline decoration-primary/30 hover:decoration-purple-600/50 underline-offset-4 decoration-2 inline-flex items-center gap-1 transition-all duration-200 font-medium"
+              className="text-primary hover:underline underline-offset-4 inline-flex items-center gap-1"
               target={href?.startsWith("http") ? "_blank" : undefined}
               rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
               {...props}
             >
               {children}
               {href?.startsWith("http") && (
-                <ExternalLink className="h-3 w-3 opacity-70" />
+                <ExternalLink className="h-3 w-3 opacity-50" />
               )}
             </a>
           ),
-          ul: ({ children, ...props }) => (
-            <ul className="space-y-3 my-6" {...props}>
-              {children}
-            </ul>
-          ),
-          ol: ({ children, ...props }) => (
-            <ol className="space-y-3 my-6" {...props}>
-              {children}
-            </ol>
-          ),
+
+          // Simpler list items
           li: ({ children, ...props }) => (
             <li
-              className="text-foreground leading-relaxed flex items-start gap-3"
+              className="text-foreground/70 leading-relaxed flex items-start gap-3 my-2"
               {...props}
             >
-              <span className="w-2 h-2 bg-gradient-to-r from-primary to-purple-500 rounded-full mt-2.5 flex-shrink-0"></span>
+              <div className="w-1 h-1 bg-primary/40 rounded-full mt-2.5 flex-shrink-0"></div>
               <span>{children}</span>
             </li>
           ),
-          p: ({ children, ...props }) => (
-            <p
-              className="text-foreground leading-relaxed my-6 text-base"
-              {...props}
-            >
-              {children}
-            </p>
-          ),
-          em: ({ children, ...props }) => (
-            <em className="italic text-muted-foreground font-medium" {...props}>
-              {children}
-            </em>
-          ),
+
+          // Clean strong text
           strong: ({ children, ...props }) => (
-            <strong
-              className="font-semibold text-foreground bg-gradient-to-r from-primary/10 to-transparent px-1 rounded"
-              {...props}
-            >
+            <strong className="font-semibold text-foreground/90" {...props}>
               {children}
             </strong>
           ),
@@ -235,6 +282,6 @@ export function MDXRenderer({ content }: MDXRendererProps) {
       >
         {content}
       </ReactMarkdown>
-    </div>
+    </motion.div>
   );
 }
