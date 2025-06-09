@@ -17,7 +17,13 @@ import {
 } from "lucide-react";
 import { MDXRenderer } from "./MDXRenderer";
 import { cn } from "@/lib/utils";
-import { mockBlogPost, mockQuickStart } from "@/lib/mock-data-editor";
+import {
+  mockBlogPost,
+  mockQuickStart,
+  Classic,
+  ArchLinux,
+  mockCosmetics,
+} from "@/lib/mock-data-editor";
 
 interface BlogEditorProps {
   initialContent?: string;
@@ -76,10 +82,29 @@ export function BlogEditor({
     }
   };
 
-  const handleInsertSample = async (sample: "blog" | "quick") => {
+  const handleInsertSample = async (
+    sample: "blog" | "quick" | "classic" | "arch" | "cosmetics"
+  ) => {
     setIsLoading(true);
     try {
-      const sampleContent = sample === "blog" ? mockBlogPost : mockQuickStart;
+      let sampleContent;
+      switch (sample) {
+        case "blog":
+          sampleContent = mockBlogPost;
+          break;
+        case "quick":
+          sampleContent = mockQuickStart;
+          break;
+        case "classic":
+          sampleContent = Classic;
+          break;
+        case "arch":
+          sampleContent = ArchLinux;
+          break;
+        case "cosmetics":
+          sampleContent = mockCosmetics;
+          break;
+      }
       handleContentChange(sampleContent);
     } finally {
       setIsLoading(false);
@@ -146,6 +171,63 @@ export function BlogEditor({
                   <>
                     <Lightbulb className="h-4 w-4" />
                     Quick Start Guide
+                  </>
+                )}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleInsertSample("classic");
+                }}
+                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span> Loading...
+                  </span>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4" />
+                    Classic Template
+                  </>
+                )}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleInsertSample("arch");
+                }}
+                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span> Loading...
+                  </span>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4" />
+                    Arch Linux Guide
+                  </>
+                )}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleInsertSample("cosmetics");
+                }}
+                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span> Loading...
+                  </span>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4" />
+                    Cosmetics Sample
                   </>
                 )}
               </button>
