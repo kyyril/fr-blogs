@@ -55,6 +55,7 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [editorContent, setEditorContent] = useState("");
 
   // Use the blog hooks
   const { createBlog, updateBlog, getBlogById } = useBlog();
@@ -183,16 +184,22 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
     form.setValue("categories", newCategories);
   };
 
+  // Add validation for content before form submission
   const onSubmit = async (values: FormValues) => {
+    // Validate content length
+    if (!editorContent || editorContent.length < 50) {
+      form.setError("content", {
+        type: "manual",
+        message: "Content must be at least 50 characters",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Prepare data object
       const dataToSubmit = {
-        title: values.title,
-        description: values.description,
-        content: values.content,
-        readingTime: values.readingTime,
-        featured: values.featured,
+        ...values,
+        content: editorContent, // Use the editorContent state
         categories: categories,
         tags: tags,
         ...(values.image && { image: values.image }),
@@ -493,11 +500,17 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <BlogEditor
-                  value={field.value}
-                  onChange={field.onChange}
-                  initialContent={isEditing ? blogData?.content || "" : ""}
-                />
+                <div className="relative">
+                  <BlogEditor
+                    initialContent={isEditing ? blogData?.content || "" : ""}
+                    onChange={(value) => {
+                      setEditorContent(value);
+                      field.onChange(value); // Update form field value
+                      form.clearErrors("content");
+                    }}
+                    isFormEditor={true}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -23,12 +23,14 @@ interface BlogEditorProps {
   initialContent?: string;
   className?: string;
   onChange?: (value: string) => void;
+  isFormEditor?: boolean; // Add this prop
 }
 
 export function BlogEditor({
   initialContent = "",
   className,
   onChange,
+  isFormEditor = false, // Add default value
 }: BlogEditorProps) {
   const [content, setContent] = useState(initialContent);
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "split">(
@@ -47,10 +49,12 @@ export function BlogEditor({
 
   const handleContentChange = (value: string) => {
     setContent(value);
+    // Always call onChange to update parent component
     onChange?.(value);
   };
 
-  const handleSave = () => {
+  const handleSave = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
     const blob = new Blob([content], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -108,7 +112,10 @@ export function BlogEditor({
             </Button>
             <div className="absolute right-0 mt-2 w-48 py-2 bg-popover border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
               <button
-                onClick={() => handleInsertSample("blog")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleInsertSample("blog");
+                }}
                 className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
                 disabled={isLoading}
               >
@@ -124,7 +131,10 @@ export function BlogEditor({
                 )}
               </button>
               <button
-                onClick={() => handleInsertSample("quick")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleInsertSample("quick");
+                }}
                 className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
                 disabled={isLoading}
               >
@@ -156,13 +166,24 @@ export function BlogEditor({
               </span>
             </Button>
           </label>
-          <Button variant="ghost" size="sm" onClick={handleSave}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSave(e);
+            }}
+          >
             <Download className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsFullscreen(!isFullscreen)}
+            onClick={(e) => {
+              e.preventDefault();
+              setIsFullscreen(!isFullscreen);
+            }}
           >
             {isFullscreen ? (
               <Minimize2 className="h-4 w-4" />
