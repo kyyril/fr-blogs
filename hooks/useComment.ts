@@ -12,8 +12,33 @@ export const useComment = (blogId: string) => {
   };
 
   const createComment = useMutation({
-    mutationFn: (content: string) =>
-      commentService.createComment(blogId, content),
+    mutationFn: ({
+      content,
+      parentId,
+    }: {
+      content: string;
+      parentId?: string;
+    }) => commentService.createComment(blogId, content, parentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", blogId] });
+    },
+  });
+
+  const updateComment = useMutation({
+    mutationFn: ({
+      commentId,
+      content,
+    }: {
+      commentId: string;
+      content: string;
+    }) => commentService.updateComment(commentId, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", blogId] });
+    },
+  });
+
+  const deleteComment = useMutation({
+    mutationFn: (commentId: string) => commentService.deleteComment(commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", blogId] });
     },
@@ -22,5 +47,7 @@ export const useComment = (blogId: string) => {
   return {
     getComments,
     createComment,
+    updateComment,
+    deleteComment,
   };
 };

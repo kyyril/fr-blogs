@@ -45,6 +45,7 @@ export interface Comment {
   authorId: string;
   blog?: Blog;
   author?: User;
+  replies?: Comment[];
 }
 
 export interface Follow {
