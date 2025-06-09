@@ -23,6 +23,7 @@ import { X, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useBlog } from "@/hooks/useBlog";
 import { BlogEditor } from "./MDXeditor";
+import Image from "next/image";
 
 const formSchema = z.object({
   title: z
@@ -85,7 +86,7 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
       const initialData = {
         title: blogData.title || "",
         description: blogData.description || "",
-        content: blogData.content || "",
+        content: blogData.content || "", // Make sure this is populated
         readingTime: blogData.readingTime || 1,
         featured: blogData.featured || false,
       };
@@ -105,8 +106,24 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
         setTags(blogData.tags);
         form.setValue("tags", blogData.tags);
       }
+
+      // Set initial content to BlogEditor
+      if (blogData.content) {
+        form.setValue("content", blogData.content);
+      }
     }
   }, [blogData, isEditing, form]);
+
+  // Add this near your other useEffect hooks
+  useEffect(() => {
+    return () => {
+      // Cleanup object URLs when component unmounts
+      const imageValue = form.getValues("image");
+      if (imageValue instanceof File) {
+        URL.revokeObjectURL(URL.createObjectURL(imageValue));
+      }
+    };
+  }, [form]);
 
   const availableCategories = [
     "Programming",
@@ -260,15 +277,33 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
             <FormItem>
               <FormLabel>Cover Image</FormLabel>
               <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    onChange(file);
-                  }}
-                  {...field}
-                />
+                <div className="space-y-4">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      onChange(file);
+                    }}
+                    {...field}
+                  />
+
+                  {/* Image Preview */}
+                  {(value || (isEditing && blogData?.image)) && (
+                    <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                      <Image
+                        src={
+                          value
+                            ? URL.createObjectURL(value as File)
+                            : blogData?.image || ""
+                        }
+                        alt="Cover image preview"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
               </FormControl>
               <FormDescription>
                 Upload a cover image for your blog. Recommended size:
@@ -458,7 +493,11 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <BlogEditor value={field.value} onChange={field.onChange} />
+                <BlogEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                  initialContent={isEditing ? blogData?.content || "" : ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
