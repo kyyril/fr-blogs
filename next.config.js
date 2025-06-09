@@ -5,6 +5,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
+  transpilePackages: ["react-syntax-highlighter"],
 };
 
 module.exports = nextConfig;

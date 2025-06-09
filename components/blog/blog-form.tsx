@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BlogEditor } from "@/components/blog/editor";
+import { BlogEditor } from "@/components/blog/MDXeditor";
 import { Badge } from "@/components/ui/badge";
 import { X, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
