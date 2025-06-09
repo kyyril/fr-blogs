@@ -137,9 +137,9 @@ export function MDXRenderer({ content }: MDXRendererProps) {
                   animate="animate"
                   className="relative group my-8 rounded-lg overflow-hidden border border-border/30 dark:border-white/10"
                 >
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-border/30 dark:border-white/10">
+                  <div className="flex dark:bg-slate-600/50 border-none outline-none items-center justify-between px-4 py-2 border-b border-border/30 dark:border-white/10">
                     <div className="flex items-center gap-3">
-                      <span className="text-xs font-medium text-foreground/50">
+                      <span className="text-xs font-medium text-foreground/60">
                         {language}
                       </span>
                     </div>
@@ -157,61 +157,12 @@ export function MDXRenderer({ content }: MDXRendererProps) {
                     </Button>
                   </div>
                   <SyntaxHighlighter
-                    style={
-                      isDark
-                        ? {
-                            ...oneDark,
-                            comment: {
-                              color: "#8b949e",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                            prolog: {
-                              color: "#8b949e",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                            doctype: {
-                              color: "#8b949e",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                            cdata: {
-                              color: "#8b949e",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                          }
-                        : {
-                            ...oneLight,
-                            comment: {
-                              color: "#6e7781",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                            prolog: {
-                              color: "#6e7781",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                            doctype: {
-                              color: "#6e7781",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                            cdata: {
-                              color: "#6e7781",
-                              fontStyle: "italic",
-                              background: "transparent",
-                            },
-                          }
-                    }
+                    style={isDark ? oneDark : oneLight}
                     language={language}
                     PreTag="div"
                     className="!mt-0 !rounded-none !border-none"
                     customStyle={{
                       margin: 0,
-                      background: "transparent",
                       padding: "1.25rem",
                       fontSize: "0.9rem",
                       lineHeight: "1.5",
