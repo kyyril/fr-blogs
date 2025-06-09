@@ -82,8 +82,33 @@
 }
 
 @layer utilities {
+  .glass-effect {
+    @apply bg-background/60 
+           backdrop-blur-md 
+           border-border/50 
+           shadow-[0_8px_32px_rgba(0,0,0,0.1)]
+           dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)];
+  }
+
   .scroll-smooth {
     scroll-behavior: smooth;
+  }
+
+  .sticky-container {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 

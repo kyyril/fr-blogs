@@ -22,6 +22,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { List } from "lucide-react";
+import { motion, useScroll, useSpring } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface BlogDetailClientProps {
   blog: Blog;
@@ -33,6 +35,12 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
   const { user: currentUser } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
   const [followStatusLoading, setFollowStatusLoading] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
 
   useEffect(() => {
     // Record blog view when component mounts
@@ -75,6 +83,12 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
   return (
     <>
+      {/* Global Reading Progress */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-0.5 bg-primary z-[100] origin-left"
+        style={{ scaleX }}
+      />
+
       {/* Mobile TOC Button - Fixed Position */}
       <div className="lg:hidden fixed bottom-4 right-4 z-50">
         <Sheet>
@@ -88,9 +102,23 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
               Contents
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+          <SheetContent
+            side="right"
+            className={cn(
+              "w-[300px] sm:w-[400px]",
+              "bg-background/60 dark:bg-background/40", // Glassmorphism background
+              "backdrop-blur-xl", // Strong blur effect
+              "border-border/50", // Subtle border
+              "[&_[data-radix-scroll-area-viewport]]:!block", // Fix for scroll area
+              // Enhanced shadow and rounded corners
+              "shadow-[0_0_1rem_rgba(0,0,0,.1)] dark:shadow-[0_0_1rem_rgba(0,0,0,.3)]",
+              "rounded-l-2xl"
+            )}
+          >
             <SheetHeader>
-              <SheetTitle>Table of Contents</SheetTitle>
+              <SheetTitle className="text-foreground/90">
+                Table of Contents
+              </SheetTitle>
             </SheetHeader>
             <div className="mt-4">
               <TableOfContents content={blog.content} isMobile />
@@ -204,10 +232,26 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
         {/* Desktop TOC - Fixed Sidebar */}
         <div className="hidden lg:block">
-          <div className="sticky top-4">
-            <div className="rounded-lg border bg-card p-4">
+          <div className="sticky top-20">
+            {" "}
+            {/* Adjusted for header height */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className={cn(
+                "rounded-lg border",
+                "bg-card/60 dark:bg-card/40",
+                "backdrop-blur-md",
+                "shadow-lg",
+                "p-4",
+                // Glass effect
+                "border-border/50",
+                "dark:shadow-[0_0_1rem_rgba(0,0,0,.2)]"
+              )}
+            >
               <TableOfContents content={blog.content} />
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
