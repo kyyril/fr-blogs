@@ -13,7 +13,7 @@ import {
   Columns,
   Maximize2,
   Minimize2,
-  LightbulbIcon,
+  Lightbulb, // Change from LightbulbIcon to Lightbulb
 } from "lucide-react";
 import { MDXRenderer } from "./MDXRenderer";
 import { cn } from "@/lib/utils";
@@ -98,22 +98,46 @@ export function BlogEditor({
 
         <div className="flex items-center gap-2">
           <div className="relative group">
-            <Button variant="ghost" size="sm" className="gap-2" asChild>
-              <LightbulbIcon className="h-4 w-4" />
-              <span className="hidden md:inline">Samples</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Lightbulb className="h-4 w-4" />
+              <span className="hidden md:inline">Examples</span>
             </Button>
-            <div className="absolute right-0 mt-2 w-48 py-2 bg-popover border rounded-lg shadow-lg scale-0 group-hover:scale-100 transition-transform origin-top-right z-50">
+            <div className="absolute right-0 mt-2 w-48 py-2 bg-popover border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
               <button
                 onClick={() => handleInsertSample("blog")}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
+                disabled={isLoading}
               >
-                Full Blog Post
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span> Loading...
+                  </span>
+                ) : (
+                  <>
+                    <FileText className="h-4 w-4" />
+                    Full Blog Post
+                  </>
+                )}
               </button>
               <button
                 onClick={() => handleInsertSample("quick")}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
+                disabled={isLoading}
               >
-                Quick Start Guide
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin">⏳</span> Loading...
+                  </span>
+                ) : (
+                  <>
+                    <Lightbulb className="h-4 w-4" />
+                    Quick Start Guide
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -172,16 +196,26 @@ export function BlogEditor({
 
         <div className="flex-1 overflow-hidden">
           <TabsContent value="edit" className="h-full">
-            <Textarea
-              value={content}
-              onChange={(e) => handleContentChange(e.target.value)}
-              className={cn(
-                "h-full resize-none border-0 focus-visible:ring-0",
-                isLoading && "opacity-50 cursor-wait"
+            <div className="relative h-full">
+              <Textarea
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                className={cn(
+                  "h-full resize-none border-0 focus-visible:ring-0",
+                  isLoading && "opacity-50"
+                )}
+                placeholder="Write your content in MDX..."
+                disabled={isLoading}
+              />
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="animate-spin">⏳</span>
+                    Loading example...
+                  </div>
+                </div>
               )}
-              placeholder="Write your content in MDX..."
-              disabled={isLoading}
-            />
+            </div>
           </TabsContent>
 
           <TabsContent value="preview" className="h-full">
@@ -195,13 +229,25 @@ export function BlogEditor({
           {!isMobile && (
             <TabsContent value="split" className="h-full">
               <div className="flex h-full divide-x">
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <Textarea
                     value={content}
                     onChange={(e) => handleContentChange(e.target.value)}
-                    className="h-full resize-none border-0 focus-visible:ring-0"
+                    className={cn(
+                      "h-full resize-none border-0 focus-visible:ring-0",
+                      isLoading && "opacity-50"
+                    )}
                     placeholder="Write your content in MDX..."
+                    disabled={isLoading}
                   />
+                  {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="animate-spin">⏳</span>
+                        Loading example...
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 flex">
                   <div className="flex-1 overflow-auto p-4">
