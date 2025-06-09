@@ -80,3 +80,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Add smooth scrolling to html */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
