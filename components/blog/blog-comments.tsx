@@ -5,7 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Heart, Reply, MoreVertical, Send, Edit, Trash } from "lucide-react";
+import {
+  Heart,
+  Reply,
+  MoreVertical,
+  Send,
+  Edit,
+  Trash,
+  Loader2,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +25,15 @@ import { useComment } from "@/hooks/useComment";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+
+export interface PaginatedCommentsResponse {
+  comments: Comment[];
+  pagination: {
+    total: number;
+    pages: number;
+    current: number;
+  };
+}
 
 interface BlogCommentsProps {
   blogId: string;
@@ -30,8 +47,15 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [page, setPage] = useState(1);
+  const [expandedReplies, setExpandedReplies] = useState<Set<string>>(
+    new Set()
+  );
+  const [loadingReplies, setLoadingReplies] = useState<Set<string>>(new Set());
+  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
+
   const { getComments, createComment, updateComment, deleteComment } =
     useComment(blogId);
+
   // Destructure comments and pagination from the response
   const { data, isLoading } = getComments(page);
   const comments = data?.comments || [];
@@ -123,6 +147,36 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
     }
   };
 
+  const handleLoadMoreComments = async () => {
+    if (!pagination || page >= pagination.pages) return;
+    setLoadingMoreComments(true);
+    try {
+      setPage(page + 1);
+    } finally {
+      setLoadingMoreComments(false);
+    }
+  };
+
+  const handleLoadMoreReplies = async (commentId: string) => {
+    setLoadingReplies((prev) => new Set(prev).add(commentId));
+    try {
+      // Simulate loading more replies
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setExpandedReplies((prev) => new Set(prev).add(commentId));
+    } finally {
+      setLoadingReplies((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(commentId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleProfileClick = (authorId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    router.push(`/profile/${authorId}`);
+  };
+
   return (
     <div id="comments" className="space-y-6">
       {/* Comment Form */}
@@ -145,8 +199,15 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button onClick={handlePostComment}>
-            <Send className="mr-2 h-4 w-4" />
+          <Button
+            onClick={handlePostComment}
+            disabled={createComment.isPending || !newComment.trim()}
+          >
+            {createComment.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
             Post Comment
           </Button>
         </div>
@@ -155,7 +216,10 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
       {/* Comments List */}
       <div className="space-y-6">
         {isLoading ? (
-          <div className="text-center">Loading comments...</div>
+          <div className="flex justify-center items-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            <span>Loading comments...</span>
+          </div>
         ) : comments.length === 0 ? (
           <div className="rounded-lg border border-dashed p-6 text-center">
             <p className="text-muted-foreground">
@@ -166,16 +230,26 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
           comments.map((comment) => (
             <div key={comment.id} className="space-y-4">
               <div className="flex gap-3">
-                <Avatar className="mt-1 h-8 w-8">
-                  <AvatarImage
-                    src={comment?.author?.avatar}
-                    alt={comment?.author?.name}
-                  />
-                  <AvatarFallback>{comment?.author?.name[0]}</AvatarFallback>
-                </Avatar>
+                {/* Profile-clickable Author Info */}
+                <div
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={(e) => handleProfileClick(comment.authorId, e)}
+                >
+                  <Avatar className="mt-1 h-8 w-8">
+                    <AvatarImage
+                      src={comment?.author?.avatar}
+                      alt={comment?.author?.name}
+                    />
+                    <AvatarFallback>{comment?.author?.name[0]}</AvatarFallback>
+                  </Avatar>
+                </div>
+
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={(e) => handleProfileClick(comment.authorId, e)}
+                    >
                       <p className="text-sm font-medium">
                         {comment?.author?.name}
                       </p>
@@ -220,6 +294,7 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
+
                   {editingComment === comment.id ? (
                     <div className="space-y-2">
                       <Textarea
@@ -241,7 +316,11 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                         <Button
                           size="sm"
                           onClick={() => handleEdit(comment.id)}
+                          disabled={updateComment.isPending}
                         >
+                          {updateComment.isPending ? (
+                            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          ) : null}
                           Save
                         </Button>
                       </div>
@@ -294,7 +373,11 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                         <Button
                           size="sm"
                           onClick={() => handleReply(comment.id)}
+                          disabled={createComment.isPending}
                         >
+                          {createComment.isPending ? (
+                            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                          ) : null}
                           Reply
                         </Button>
                       </div>
@@ -305,57 +388,95 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                   {comment.replies && comment.replies.length > 0 && (
                     <div className="mt-4 space-y-4 pl-4">
                       <Separator className="my-2" />
-                      {comment.replies?.map((reply) => (
-                        <div
-                          key={reply.id}
-                          className="flex gap-3 hover:bg-muted/50 rounded-lg p-2 cursor-pointer"
-                          onClick={() =>
-                            router.push(`/profile/${reply.authorId}`)
-                          }
-                        >
-                          <Avatar className="mt-1 h-6 w-6">
-                            <AvatarImage
-                              src={reply.author?.avatar}
-                              alt={reply.author?.name}
-                            />
-                            <AvatarFallback>
-                              {reply.author?.name[0]}
-                            </AvatarFallback>
-                          </Avatar>
-
-                          <div className="flex-1 space-y-1">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium">
-                                  {reply.author?.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {formatDistanceToNow(
-                                    new Date(reply.createdAt),
-                                    { addSuffix: true }
-                                  )}
-                                </p>
-                              </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 w-7 p-0"
-                                  >
-                                    <MoreVertical className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>Report</DropdownMenuItem>
-                                  <DropdownMenuItem>Copy text</DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                      {comment.replies
+                        ?.slice(
+                          0,
+                          expandedReplies.has(comment.id) ? undefined : 3
+                        )
+                        .map((reply) => (
+                          <div
+                            key={reply.id}
+                            className="flex gap-3 hover:bg-muted/50 rounded-lg p-2 transition-colors"
+                          >
+                            {/* Profile-clickable Reply Author */}
+                            <div
+                              className="cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={(e) =>
+                                handleProfileClick(reply.authorId, e)
+                              }
+                            >
+                              <Avatar className="mt-1 h-6 w-6">
+                                <AvatarImage
+                                  src={reply.author?.avatar}
+                                  alt={reply.author?.name}
+                                />
+                                <AvatarFallback>
+                                  {reply.author?.name[0]}
+                                </AvatarFallback>
+                              </Avatar>
                             </div>
-                            <p className="text-sm">{reply.content}</p>
+
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-center justify-between">
+                                <div
+                                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={(e) =>
+                                    handleProfileClick(reply.authorId, e)
+                                  }
+                                >
+                                  <p className="text-sm font-medium">
+                                    {reply.author?.name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(
+                                      new Date(reply.createdAt),
+                                      { addSuffix: true }
+                                    )}
+                                  </p>
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0"
+                                    >
+                                      <MoreVertical className="h-3 w-3" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem>Report</DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                      Copy text
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                              <p className="text-sm">{reply.content}</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+
+                      {/* Load More Replies Button */}
+                      {comment.replies.length > 3 &&
+                        !expandedReplies.has(comment.id) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-muted-foreground ml-9"
+                            onClick={() => handleLoadMoreReplies(comment.id)}
+                            disabled={loadingReplies.has(comment.id)}
+                          >
+                            {loadingReplies.has(comment.id) ? (
+                              <>
+                                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              `Show ${comment.replies.length - 3} more replies`
+                            )}
+                          </Button>
+                        )}
                     </div>
                   )}
                 </div>
@@ -364,28 +485,33 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
           ))
         )}
 
-        {/* Pagination */}
+        {/* Load More Comments Button */}
+        {pagination && pagination.current < pagination.pages && (
+          <div className="flex justify-center mt-6">
+            <Button
+              variant="outline"
+              onClick={handleLoadMoreComments}
+              disabled={loadingMoreComments}
+            >
+              {loadingMoreComments ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading more comments...
+                </>
+              ) : (
+                `Load more comments (${
+                  pagination.total - pagination.current * 10
+                } remaining)`
+              )}
+            </Button>
+          </div>
+        )}
+
+        {/* Pagination Info */}
         {pagination && pagination.pages > 1 && (
-          <div className="flex justify-center gap-2 mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-            >
-              Previous
-            </Button>
-            <span className="flex items-center">
-              Page {page} of {pagination.pages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === pagination.pages}
-              onClick={() => setPage(page + 1)}
-            >
-              Next
-            </Button>
+          <div className="flex justify-center text-sm text-muted-foreground">
+            Showing {Math.min(pagination.current * 10, pagination.total)} of{" "}
+            {pagination.total} comments
           </div>
         )}
       </div>

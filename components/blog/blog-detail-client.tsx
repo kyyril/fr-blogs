@@ -49,9 +49,9 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
   // Check follow status for the blog author
   useEffect(() => {
-    if (currentUser && blog.author.id !== currentUser.id) {
+    if (currentUser && blog?.author?.id !== currentUser.id) {
       setFollowStatusLoading(true);
-      followStatus.mutate(blog.author.id, {
+      followStatus.mutate(blog.author?.id, {
         onSuccess: (data: any) => {
           setIsFollowing(data.is_following);
           setFollowStatusLoading(false);
@@ -61,17 +61,17 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
         },
       });
     }
-  }, [currentUser, blog.author.id]);
+  }, [currentUser, blog.author?.id]);
 
   const handleFollowToggle = async () => {
     if (!currentUser) return;
 
     try {
       if (isFollowing) {
-        await unfollowUser.mutateAsync(blog.author.id);
+        await unfollowUser.mutateAsync(blog.author?.id);
         setIsFollowing(false);
       } else {
-        await followUser.mutateAsync(blog.author.id);
+        await followUser.mutateAsync(blog.author?.id);
         setIsFollowing(true);
       }
     } catch (error) {
@@ -79,7 +79,7 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
     }
   };
 
-  const isOwnBlog = currentUser?.id === blog.author.id;
+  const isOwnBlog = currentUser?.id === blog.author?.id;
 
   return (
     <>
@@ -147,16 +147,16 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
           <div className="mb-12 rounded-lg bg-muted p-6">
             <div className="flex flex-col items-start gap-4 sm:flex-row">
               <Link
-                href={`/profile/${blog.author.id}`}
+                href={`/profile/${blog.author?.id}`}
                 className="hover:opacity-80 transition-opacity"
               >
                 <Avatar className="h-16 w-16 cursor-pointer">
                   <AvatarImage
-                    src={blog.author.avatar || ""}
-                    alt={blog.author.name}
+                    src={blog.author?.avatar || ""}
+                    alt={blog.author?.name}
                   />
                   <AvatarFallback className="text-lg">
-                    {blog.author.name
+                    {blog.author?.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -166,17 +166,17 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
               <div className="flex-1">
                 <Link
-                  href={`/profile/${blog.author.id}`}
+                  href={`/profile/${blog.author?.id}`}
                   className="hover:text-primary transition-colors"
                 >
                   <h3 className="mb-1 text-lg font-semibold cursor-pointer">
-                    {blog.author.name}
+                    {blog.author?.name}
                   </h3>
                 </Link>
 
                 <p className="mb-3 text-muted-foreground">
-                  {blog.author.bio ||
-                    `${blog.author.name} is a passionate writer and contributor to our blog community. Follow for more insightful content and updates.`}
+                  {blog.author?.bio ||
+                    `${blog.author?.name} is a passionate writer and contributor to our blog community. Follow for more insightful content and updates.`}
                 </p>
 
                 <div className="flex items-center gap-3">
@@ -204,7 +204,7 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   )}
 
                   {/* View Profile Button */}
-                  <Link href={`/profile/${blog.author.id}`}>
+                  <Link href={`/profile/${blog.author?.id}`}>
                     <Button variant="outline" size="sm">
                       View Profile
                     </Button>
