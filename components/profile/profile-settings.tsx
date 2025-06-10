@@ -25,9 +25,6 @@ export function ProfileSettings({ userId, onClose }: ProfileSettingsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  console.log("user:", user);
-  console.log("currentUser:", currentUser);
-
   const [profileForm, setProfileForm] = useState<UpdateProfileData>(() => ({
     name: user?.name || "",
     bio: user?.bio || "",
@@ -70,13 +67,11 @@ export function ProfileSettings({ userId, onClose }: ProfileSettingsProps) {
       formData.append("githubAcc", profileForm.githubAcc);
       formData.append("linkedinAcc", profileForm.linkedinAcc);
       formData.append("anotherAcc", profileForm.anotherAcc);
-
-      // Add avatar if present
-      if (profileForm.avatar) {
-        formData.append("avatar", profileForm.avatar);
-      }
+      formData.append("avatar", profileForm.avatar || "");
 
       await updateProfile.mutateAsync(profileForm);
+      console.log("Updating profile with data:", formData);
+      console.log("Profile form data:", profileForm);
       toast.success("Profile updated successfully");
       onClose();
     } catch (error) {
