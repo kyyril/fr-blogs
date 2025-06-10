@@ -186,8 +186,8 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
 
   // Add validation for content before form submission
   const onSubmit = async (values: FormValues) => {
-    // Validate content length
-    if (!editorContent || editorContent.length < 50) {
+    // Validate content length using values.content instead of editorContent
+    if (!values.content || values.content.length < 50) {
       form.setError("content", {
         type: "manual",
         message: "Content must be at least 50 characters",
@@ -199,7 +199,7 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
     try {
       const dataToSubmit = {
         ...values,
-        content: editorContent, // Use the editorContent state
+        content: values.content, // Use values.content instead of editorContent
         categories: categories,
         tags: tags,
         ...(values.image && { image: values.image }),
