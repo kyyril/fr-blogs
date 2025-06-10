@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/user.services";
-import { User } from "@/lib/types/data.interface";
+import { User, UpdateProfileData } from "@/lib/types/data.interface";
 
 interface FollowStatusResponse {
   is_following: boolean;
@@ -59,11 +59,21 @@ export const useUser = () => {
     });
   };
 
+  const updateProfile = useMutation({
+    mutationFn: (data: UpdateProfileData) => userService.updateProfile(data),
+    onSuccess: (data) => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+    },
+  });
+
   return {
     getProfile,
     followUser,
     unfollowUser,
     followStatus,
     getCurrentUserProfile,
+    updateProfile,
   };
 };

@@ -50,15 +50,6 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href="/blog/my-blogs"
-              className="flex w-full cursor-pointer items-center"
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              <span>My Blogs</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link
               href="/bookmarks"
               className="flex w-full cursor-pointer items-center"
             >
@@ -68,7 +59,7 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href="/settings"
+              href={`/profile/${user?.id}`}
               className="flex w-full cursor-pointer items-center"
             >
               <Settings className="mr-2 h-4 w-4" />

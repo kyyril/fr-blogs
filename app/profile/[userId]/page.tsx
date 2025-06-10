@@ -13,6 +13,13 @@ import { useUser } from "@/hooks/useUser";
 import { Twitter, Github, Linkedin, Loader2, PenIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth"; // Assuming you have auth context
 import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ProfileSettings } from "@/components/profile/profile-settings";
 
 interface ProfilePageProps {
   params: {
@@ -25,6 +32,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const { user: currentUser } = useAuth(); // Get current logged-in user
   const [isFollowing, setIsFollowing] = useState(false);
   const [followStatusLoading, setFollowStatusLoading] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Add this state
 
   const { data: user, isLoading, error } = getProfile(params.userId);
 
@@ -135,9 +143,29 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               )}
 
               {isOwnProfile && (
-                <Link href="/profile/edit">
-                  <Button variant="outline">Edit Profile</Button>
-                </Link>
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsSettingsOpen(true)}
+                  >
+                    Settings
+                  </Button>
+
+                  <Dialog
+                    open={isSettingsOpen}
+                    onOpenChange={setIsSettingsOpen}
+                  >
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Profile Settings</DialogTitle>
+                      </DialogHeader>
+                      <ProfileSettings
+                        userId={params.userId}
+                        onClose={() => setIsSettingsOpen(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </>
               )}
             </div>
 
@@ -159,14 +187,12 @@ export default function ProfilePage({ params }: ProfilePageProps) {
             </div>
 
             {/* Social Links - Add these fields to your User interface if needed */}
-            {(user.socialLinks?.twitter ||
-              user.socialLinks?.github ||
-              user.socialLinks?.linkedin) && (
+            {(user.twitterAcc || user.githubAcc || user.linkedinAcc) && (
               <div className="mt-4 flex items-center justify-center gap-2 sm:justify-start">
-                {user.socialLinks?.twitter && (
+                {user.twitterAcc && (
                   <Button variant="ghost" size="icon" asChild>
                     <a
-                      href={user.socialLinks.twitter}
+                      href={user.twitterAcc}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -174,10 +200,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     </a>
                   </Button>
                 )}
-                {user.socialLinks?.github && (
+                {user.githubAcc && (
                   <Button variant="ghost" size="icon" asChild>
                     <a
-                      href={user.socialLinks.github}
+                      href={user.githubAcc}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -185,10 +211,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                     </a>
                   </Button>
                 )}
-                {user.socialLinks?.linkedin && (
+                {user.linkedinAcc && (
                   <Button variant="ghost" size="icon" asChild>
                     <a
-                      href={user.socialLinks.linkedin}
+                      href={user.linkedinAcc}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

@@ -1,4 +1,4 @@
-import { User } from "@/lib/types/data.interface";
+import { User, UpdateProfileData } from "@/lib/types/data.interface";
 import { httpService } from "./http.services";
 
 interface FollowStatusResponse {
@@ -39,18 +39,28 @@ export class UserService {
     );
   }
 
-  // async updateProfile(data: Partial<User>): Promise<User> {
-  //   return httpService.put<User>(`/api/users/me`, data);
-  // }
+  async updateProfile(data: UpdateProfileData): Promise<User> {
+    const formData = new FormData();
 
-  // async uploadAvatar(file: File): Promise<{ avatar: string }> {
-  //   const formData = new FormData();
-  //   formData.append("avatar", file);
-  //   return httpService.post<{ avatar: string }>(
-  //     `/api/users/me/avatar`,
-  //     formData
-  //   );
-  // }
+    // Add text fields
+    formData.append("name", data.name);
+    formData.append("bio", data.bio);
+    formData.append("country", data.country);
+    formData.append("twitterAcc", data.twitterAcc);
+    formData.append("githubAcc", data.githubAcc);
+    formData.append("linkedinAcc", data.linkedinAcc);
+    formData.append("anotherAcc", data.anotherAcc);
+    // Add avatar if present
+    if (data.avatar) {
+      formData.append("avatar", data.avatar);
+    }
+
+    return httpService.put<User>("/api/users/profile", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  }
 }
 
 export const userService = UserService.getInstance();

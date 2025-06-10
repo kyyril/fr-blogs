@@ -10,9 +10,25 @@ export interface User {
   blogs?: Blog[];
   comments?: Comment[];
   followers?: Follow[];
+  country: string;
   following?: Follow[];
   viewedBlogs?: BlogView[];
   profileViews: number;
+  twitterAcc: string;
+  githubAcc: string;
+  linkedinAcc: string;
+  anotherAcc: string;
+}
+
+export interface UpdateProfileData {
+  name: string;
+  bio: string;
+  country: string;
+  twitterAcc: string;
+  githubAcc: string;
+  linkedinAcc: string;
+  anotherAcc: string;
+  avatar?: File;
 }
 
 export interface Blog {
