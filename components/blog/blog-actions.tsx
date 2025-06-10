@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import {
   Heart,
   Share2,
@@ -21,7 +21,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "@/components/ui/toast";
+import { useBlog } from "@/hooks/useBlog";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 interface BlogActionsProps {
   blog: {
@@ -37,29 +39,57 @@ interface BlogActionsProps {
 }
 
 export function BlogActions({ blog }: BlogActionsProps) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(0);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const { user } = useAuth();
+  const { getBlogInteraction, toggleLike, toggleBookmark } = useBlog();
 
-  const handleLike = () => {
-    // In a real app, this would be an API call
-    if (isLiked) {
-      setLikes(likes - 1);
-    } else {
-      setLikes(likes + 1);
+  const {
+    data: interaction,
+    isLoading,
+    isError,
+  } = getBlogInteraction(blog.id, {
+    enabled: !!user, // Only fetch if user is logged in
+  });
+
+  const handleLike = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to like this blog",
+        variant: "destructive",
+      });
+      return;
     }
-    setIsLiked(!isLiked);
+
+    try {
+      await toggleLike.mutateAsync(blog.id);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleBookmark = () => {
-    // In a real app, this would be an API call
-    setIsBookmarked(!isBookmarked);
-    toast({
-      title: isBookmarked ? "Removed from bookmarks" : "Added to bookmarks",
-      description: isBookmarked
-        ? "This blog has been removed from your bookmarks"
-        : "This blog has been added to your bookmarks",
-    });
+  const handleBookmark = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to bookmark this blog",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await toggleBookmark.mutateAsync(blog.id);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update bookmark status",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCopyLink = () => {
@@ -85,13 +115,14 @@ export function BlogActions({ blog }: BlogActionsProps) {
         size="sm"
         className="gap-2"
         onClick={handleLike}
+        disabled={isLoading || toggleLike.isPending}
       >
-        {isLiked ? (
+        {interaction?.liked ? (
           <HeartFilled className="h-4 w-4 text-destructive" />
         ) : (
           <Heart className="h-4 w-4" />
         )}
-        <span>{likes}</span>
+        <span>{interaction?.likeCount ?? 0}</span>
       </Button>
 
       <Button
@@ -105,7 +136,6 @@ export function BlogActions({ blog }: BlogActionsProps) {
         }
       >
         <MessageSquare className="h-4 w-4" />
-        <span>{blog?.stats?.comments}</span>
       </Button>
 
       <Button
@@ -113,12 +143,14 @@ export function BlogActions({ blog }: BlogActionsProps) {
         size="sm"
         className="gap-2"
         onClick={handleBookmark}
+        disabled={isLoading || toggleBookmark.isPending}
       >
-        {isBookmarked ? (
+        {interaction?.bookmarked ? (
           <BookmarkCheck className="h-4 w-4 text-primary" />
         ) : (
           <Bookmark className="h-4 w-4" />
         )}
+        <span>{interaction?.bookmarkCount ?? 0}</span>
       </Button>
 
       <Separator orientation="vertical" className="h-6" />

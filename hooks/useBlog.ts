@@ -3,6 +3,7 @@ import {
   blogService,
   CreateBlogDto,
   BlogsResponse,
+  BlogInteractionResponse,
 } from "@/services/blog.services";
 import { Blog } from "@/lib/types/data.interface";
 
@@ -15,14 +16,6 @@ export const useBlog = () => {
       queryFn: () => blogService.getBlogs(page, limit),
     });
   };
-
-  // const getBlogBySlug = (slug: string, options?: { enabled?: boolean }) => {
-  //   return useQuery<Blog>({
-  //     queryKey: ["blog", "slug", slug],
-  //     queryFn: () => blogService.getBlogBySlug(slug),
-  //     enabled: options?.enabled !== false && !!slug,
-  //   });
-  // };
 
   const getBlogById = (id: string, options?: { enabled?: boolean }) => {
     return useQuery<Blog>({
@@ -44,6 +37,15 @@ export const useBlog = () => {
     return useQuery<BlogsResponse>({
       queryKey: ["blogs", "category", category, page, limit],
       queryFn: () => blogService.getBlogsByCategory(category, page, limit),
+    });
+  };
+
+  // New method to get blog interaction status
+  const getBlogInteraction = (id: string, options?: { enabled?: boolean }) => {
+    return useQuery<BlogInteractionResponse>({
+      queryKey: ["blog", "interaction", id],
+      queryFn: () => blogService.getBlogInteraction(id),
+      enabled: options?.enabled !== false && !!id,
     });
   };
 
@@ -73,15 +75,118 @@ export const useBlog = () => {
     mutationFn: (id: string) => blogService.recordView(id),
   });
 
+  // New mutations for like/bookmark functionality
+  const toggleLike = useMutation({
+    mutationFn: (id: string) => blogService.toggleLike(id),
+    onMutate: async (id: string) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({
+        queryKey: ["blog", "interaction", id],
+      });
+
+      // Snapshot the previous value
+      const previousInteraction =
+        queryClient.getQueryData<BlogInteractionResponse>([
+          "blog",
+          "interaction",
+          id,
+        ]);
+
+      // Optimistically update to the new value
+      if (previousInteraction) {
+        queryClient.setQueryData<BlogInteractionResponse>(
+          ["blog", "interaction", id],
+          {
+            ...previousInteraction,
+            liked: !previousInteraction.liked,
+            likeCount: previousInteraction.liked
+              ? previousInteraction.likeCount - 1
+              : previousInteraction.likeCount + 1,
+          }
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousInteraction };
+    },
+    onError: (err, id, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousInteraction) {
+        queryClient.setQueryData(
+          ["blog", "interaction", id],
+          context.previousInteraction
+        );
+      }
+    },
+    onSettled: (data, error, id) => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ["blog", "interaction", id] });
+    },
+  });
+
+  const toggleBookmark = useMutation({
+    mutationFn: (id: string) => blogService.toggleBookmark(id),
+    onMutate: async (id: string) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["blog", "interaction", id],
+      });
+
+      // Snapshot the previous value
+      const previousInteraction =
+        queryClient.getQueryData<BlogInteractionResponse>([
+          "blog",
+          "interaction",
+          id,
+        ]);
+
+      // Optimistically update to the new value
+      if (previousInteraction) {
+        queryClient.setQueryData<BlogInteractionResponse>(
+          ["blog", "interaction", id],
+          {
+            ...previousInteraction,
+            bookmarked: !previousInteraction.bookmarked,
+            bookmarkCount: previousInteraction.bookmarkCount
+              ? previousInteraction.bookmarked
+                ? previousInteraction.bookmarkCount - 1
+                : previousInteraction.bookmarkCount + 1
+              : previousInteraction.bookmarked
+              ? 0
+              : 1,
+          }
+        );
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousInteraction };
+    },
+    onError: (err, id, context) => {
+      // If the mutation fails, use the context to roll back
+      if (context?.previousInteraction) {
+        queryClient.setQueryData(
+          ["blog", "interaction", id],
+          context.previousInteraction
+        );
+      }
+    },
+    onSettled: (data, error, id) => {
+      // Always refetch after error or success
+      queryClient.invalidateQueries({ queryKey: ["blog", "interaction", id] });
+    },
+  });
+
   return {
     getBlogs,
-    // getBlogBySlug,
     searchBlogs,
     getBlogById,
     getBlogsByCategory,
+    getBlogInteraction, // New method
     createBlog,
     updateBlog,
     deleteBlog,
     recordView,
+    toggleLike, // New mutation
+    toggleBookmark, // New mutation
   };
 };

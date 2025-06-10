@@ -19,6 +19,25 @@ export interface CreateBlogDto {
   image: File;
 }
 
+export interface BlogInteractionResponse {
+  liked: boolean;
+  bookmarked: boolean;
+  likeCount: number;
+  bookmarkCount?: number;
+}
+
+export interface ToggleLikeResponse {
+  message: string;
+  liked: boolean;
+  likeCount: number;
+}
+
+export interface ToggleBookmarkResponse {
+  message: string;
+  bookmarked: boolean;
+  bookmarkCount: number;
+}
+
 export class BlogService {
   private static instance: BlogService;
 
@@ -33,7 +52,6 @@ export class BlogService {
 
   async createBlog(data: CreateBlogDto): Promise<Blog> {
     const formData = new FormData();
-
     // Append fields individually with proper handling
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -51,14 +69,12 @@ export class BlogService {
         }
       }
     });
-
     // Don't override Content-Type header - let browser set it automatically with boundary
     return httpService.post<Blog>("/api/blogs", formData);
   }
 
   async updateBlog(id: string, data: Partial<CreateBlogDto>): Promise<Blog> {
     const formData = new FormData();
-
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (key === "categories" || key === "tags") {
@@ -75,10 +91,10 @@ export class BlogService {
         }
       }
     });
-
     // Don't override Content-Type header - let browser set it automatically with boundary
     return httpService.put<Blog>(`/api/blogs/blog/${id}`, formData);
   }
+
   async deleteBlog(id: string): Promise<void> {
     return httpService.delete(`/api/blogs/blog/${id}`);
   }
@@ -88,10 +104,6 @@ export class BlogService {
       `/api/blogs?page=${page}&limit=${limit}`
     );
   }
-
-  // async getBlogBySlug(slug: string): Promise<Blog> {
-  //   return httpService.get<Blog>(`/api/blogs/${slug}`);
-  // }
 
   async getBlogById(id: string): Promise<Blog> {
     return httpService.get<Blog>(`/api/blogs/blog/${id}`);
@@ -119,6 +131,23 @@ export class BlogService {
 
   async recordView(id: string): Promise<void> {
     return httpService.post(`/api/blogs/blog/${id}/view`);
+  }
+
+  // New methods for like/bookmark functionality
+  async getBlogInteraction(id: string): Promise<BlogInteractionResponse> {
+    return httpService.get<BlogInteractionResponse>(
+      `/api/blogs/blog/${id}/interaction`
+    );
+  }
+
+  async toggleLike(id: string): Promise<ToggleLikeResponse> {
+    return httpService.post<ToggleLikeResponse>(`/api/blogs/blog/${id}/like`);
+  }
+
+  async toggleBookmark(id: string): Promise<ToggleBookmarkResponse> {
+    return httpService.post<ToggleBookmarkResponse>(
+      `/api/blogs/blog/${id}/bookmark`
+    );
   }
 }
 
