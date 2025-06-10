@@ -10,31 +10,16 @@ import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageSquare, Eye } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { BlogPost } from "@/lib/types/data.interface";
 
-interface BlogCardProps {
-  blog: {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt: string;
-    coverImage: string;
-    category: string;
-    createdAt: Date;
-    readTime: number;
-    author: {
-      name: string;
-      avatar: string;
-    };
-    stats: {
-      likes: number;
-      comments: number;
-      views: number;
-    };
-  };
+export function BlogCard({
+  blog,
+  featured = false,
+}: {
+  blog: BlogPost;
   featured?: boolean;
-}
-
-export function BlogCard({ blog, featured = false }: BlogCardProps) {
+}) {
+  let createdAt = new Date(blog.date);
   return (
     <Card
       className={`overflow-hidden transition-all hover:shadow-md ${
@@ -46,7 +31,7 @@ export function BlogCard({ blog, featured = false }: BlogCardProps) {
       >
         <Link href={`/blog/${blog.id}`}>
           <Image
-            src={blog.coverImage}
+            src={blog.image}
             alt={blog.title}
             fill
             className="object-cover transition-transform duration-300 hover:scale-105"
@@ -58,53 +43,53 @@ export function BlogCard({ blog, featured = false }: BlogCardProps) {
           />
         </Link>
         <Badge className="absolute left-3 top-3 bg-background/80 backdrop-blur-sm">
-          {blog.category}
+          {blog.categories[0] || "General"}
         </Badge>
       </div>
 
       <div className={`flex flex-1 flex-col ${featured ? "md:w-3/5" : ""}`}>
         <CardHeader className="p-4 pb-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>
-              {formatDistanceToNow(blog.createdAt, { addSuffix: true })}
-            </span>
+            <span>{formatDistanceToNow(createdAt, { addSuffix: true })}</span>
             <span>•</span>
-            <span>{blog.readTime} min read</span>
+            <span>{blog.readingTime || 0} min read</span>
           </div>
           <Link href={`/blog/${blog.id}`} className="group">
             <h3 className="line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
-              {blog.title}
+              {blog.title || "Untitled Blog Post"}
             </h3>
           </Link>
         </CardHeader>
 
         <CardContent className="flex-1 p-4 pt-0">
           <p className="line-clamp-2 text-sm text-muted-foreground">
-            {blog.excerpt}
+            {blog.description || "No description available."}
           </p>
         </CardContent>
 
         <CardFooter className="flex items-center justify-between p-4 pt-0">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
-              <AvatarImage src={blog.author.avatar} alt={blog.author.name} />
-              <AvatarFallback>{blog.author.name[0]}</AvatarFallback>
+              <AvatarImage src={blog.author?.avatar} alt={blog.author?.name} />
+              <AvatarFallback>{blog.author?.name[0]}</AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium">{blog.author.name}</span>
+            <span className="text-sm font-medium">
+              {blog.author?.name || "Anonymous"}
+            </span>
           </div>
 
           <div className="flex items-center gap-3 text-muted-foreground">
             <div className="flex items-center gap-1 text-xs">
               <Heart className="h-3.5 w-3.5" />
-              <span>{blog.stats.likes}</span>
+              <span>{blog.likeCount || 0}</span>
             </div>
             <div className="flex items-center gap-1 text-xs">
               <MessageSquare className="h-3.5 w-3.5" />
-              <span>{blog.stats.comments}</span>
+              <span>{blog.commentCount || 0}</span>
             </div>
             <div className="flex items-center gap-1 text-xs">
               <Eye className="h-3.5 w-3.5" />
-              <span>{blog.stats.views}</span>
+              <span>{blog.viewCount || 0}</span>
             </div>
           </div>
         </CardFooter>

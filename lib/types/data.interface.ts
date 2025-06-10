@@ -7,17 +7,17 @@ export interface User {
   googleId: string;
   createdAt: Date;
   updatedAt: Date;
-  blogs?: Blog[];
+  blogs?: BlogPost[];
   comments?: Comment[];
   followers?: Follow[];
   country: string;
   following?: Follow[];
   viewedBlogs?: BlogView[];
-  profileViews: number;
   twitterAcc: string;
   githubAcc: string;
   linkedinAcc: string;
   anotherAcc: string;
+  _count?: any;
 }
 
 export interface UpdateProfileData {
@@ -31,25 +31,31 @@ export interface UpdateProfileData {
   avatar?: File;
 }
 
-export interface Blog {
+export interface BlogPost {
   id: string;
-  slug: string;
   title: string;
+  slug: string;
   description: string;
-  date: Date;
-  image: string;
   content: string;
-  readingTime: number;
+  date: Date | string;
   featured: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  image: string;
+  readingTime: number;
+  categories: string[];
+  tags: string[];
+  author: {
+    id: string;
+    name: string;
+    bio: string;
+    avatar?: string;
+  };
   authorId: string;
-  author?: User;
-  categories?: CategoryOnBlog[];
-  tags?: TagOnBlog[];
-  comments?: Comment[];
-  views?: BlogView[];
   viewCount: number;
+  likeCount: number;
+  bookmarkCount: number;
+  commentCount: number;
+  liked: boolean; // hanya jika ada userId
+  bookmarked: boolean; // hanya jika ada userId
 }
 
 export interface Comment {
@@ -59,7 +65,7 @@ export interface Comment {
   updatedAt: Date;
   blogId: string;
   authorId: string;
-  blog?: Blog;
+  blog?: BlogPost;
   author?: User;
   replies?: Comment[];
 }
@@ -78,7 +84,7 @@ export interface BlogView {
   blogId: string;
   userId: string;
   createdAt: Date;
-  blog?: Blog;
+  blog?: BlogPost;
   user?: User;
 }
 
@@ -97,13 +103,13 @@ export interface Tag {
 export interface CategoryOnBlog {
   blogId: string;
   categoryId: string;
-  blog?: Blog;
+  blog?: BlogPost;
   category?: Category;
 }
 
 export interface TagOnBlog {
   blogId: string;
   tagId: string;
-  blog?: Blog;
+  blog?: BlogPost;
   tag?: Tag;
 }

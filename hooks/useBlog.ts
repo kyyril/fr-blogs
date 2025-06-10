@@ -5,7 +5,7 @@ import {
   BlogsResponse,
   BlogInteractionResponse,
 } from "@/services/blog.services";
-import { Blog } from "@/lib/types/data.interface";
+import { BlogPost } from "@/lib/types/data.interface";
 
 export const useBlog = () => {
   const queryClient = useQueryClient();
@@ -18,7 +18,7 @@ export const useBlog = () => {
   };
 
   const getBlogById = (id: string, options?: { enabled?: boolean }) => {
-    return useQuery<Blog>({
+    return useQuery<BlogPost>({
       queryKey: ["blog", id],
       queryFn: () => blogService.getBlogById(id),
       enabled: options?.enabled !== false && !!id,

@@ -209,7 +209,7 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
         const id = blogData?.id;
         // Update existing blog
         await updateBlog.mutateAsync({
-          id,
+          id: id || "",
           data: dataToSubmit,
         });
 

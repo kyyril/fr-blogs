@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ProfileSettings } from "@/components/profile/profile-settings";
+import { BlogPost } from "@/lib/types/data.interface";
 
 interface ProfilePageProps {
   params: {
@@ -173,15 +174,15 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
             <div className="mt-4 flex items-center justify-center gap-6 sm:justify-start">
               <div className="text-center">
-                <p className="text-xl font-bold">{user._count.blogs}</p>
+                <p className="text-xl font-bold">{user._count?.blogs}</p>
                 <p className="text-sm text-muted-foreground">Blogs</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{user._count.followers}</p>
+                <p className="text-xl font-bold">{user._count?.followers}</p>
                 <p className="text-sm text-muted-foreground">Following</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{user._count.following}</p>
+                <p className="text-xl font-bold">{user._count?.following}</p>
                 <p className="text-sm text-muted-foreground">Followers</p>
               </div>
             </div>
@@ -250,7 +251,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 }
 
 // Component to display user's blogs
-function UserBlogList({ blogs }: { blogs: any[] }) {
+function UserBlogList({ blogs }: { blogs: BlogPost[] | undefined }) {
   const { user: currentUser } = useAuth(); // Add this at the top
 
   if (!blogs || blogs.length === 0) {

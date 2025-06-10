@@ -4,8 +4,8 @@ import { BlogCard } from "@/components/blog/blog-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInView } from "react-intersection-observer";
-import { Blog } from "@/lib/types/data.interface";
 import { useBlog } from "@/hooks/useBlog";
+import { BlogPost } from "@/lib/types/data.interface";
 
 interface BlogListProps {
   featured?: boolean;
@@ -14,7 +14,7 @@ interface BlogListProps {
 }
 
 export function BlogList({ featured = false, category, limit }: BlogListProps) {
-  const [allBlogs, setAllBlogs] = useState<Blog[]>([]);
+  const [allBlogs, setAllBlogs] = useState<BlogPost[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { ref, inView } = useInView();
@@ -39,7 +39,8 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
       }
 
       // Check if there are more pages
-      setHasMore(data.pagination.page < data.pagination.totalPages);
+      const totalPages = Math.ceil(data.total / data.limit);
+      setHasMore(data.page < totalPages);
     }
   }, [data, currentPage]);
 
@@ -55,27 +56,7 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
       setCurrentPage((prev) => prev + 1);
     }
   };
-
-  // Transform data to match BlogCard interface
-  const transformBlogData = (blog: Blog) => ({
-    id: blog.id,
-    title: blog.title,
-    slug: blog.slug,
-    excerpt: blog.description,
-    coverImage: blog.image,
-    category: blog.categories?.[0]?.category?.name || "Uncategorized",
-    createdAt: blog.date,
-    readTime: blog.readingTime,
-    author: {
-      name: blog.author?.name || "Anonymous",
-      avatar: blog.author?.avatar || "/default-avatar.png",
-    },
-    stats: {
-      likes: 0, // You can add likes functionality later
-      comments: blog.comments?.length || 0,
-      views: blog.viewCount,
-    },
-  });
+  console.log("All Blogs:", allBlogs);
 
   // Handle error state
   if (error && currentPage === 1) {
@@ -129,11 +110,7 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
     <div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {allBlogs.map((blog) => (
-          <BlogCard
-            key={blog.id}
-            blog={transformBlogData(blog)}
-            featured={featured}
-          />
+          <BlogCard key={blog.id} blog={blog} featured={featured} />
         ))}
 
         {/* Loading skeletons */}

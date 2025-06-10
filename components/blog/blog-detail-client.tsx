@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { BlogActions } from "@/components/blog/blog-actions";
 import { BlogComments } from "@/components/blog/blog-comments";
 import { RelatedBlogs } from "@/components/blog/related-blogs";
-import { Blog } from "@/lib/types/data.interface";
 import { useBlog } from "@/hooks/useBlog";
 import { useUser } from "@/hooks/useUser";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,9 +23,10 @@ import {
 import { List } from "lucide-react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { BlogPost } from "@/lib/types/data.interface";
 
 interface BlogDetailClientProps {
-  blog: Blog;
+  blog: BlogPost;
 }
 
 export function BlogDetailClient({ blog }: BlogDetailClientProps) {
@@ -223,10 +223,10 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
           {/* Related Blogs */}
           <div className="mb-8">
             <h2 className="mb-6 text-2xl font-bold">Related Blogs</h2>
-            <RelatedBlogs
+            {/* <RelatedBlogs
               currentBlogId={blog.id}
-              category={blog.categories[0]} // Use first category for related blogs
-            />
+              category={blog.categories[0]}
+            /> */}
           </div>
         </div>
 

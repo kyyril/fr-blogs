@@ -24,18 +24,10 @@ import { Separator } from "@/components/ui/separator";
 import { useBlog } from "@/hooks/useBlog";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
+import { BlogPost } from "@/lib/types/data.interface";
 
 interface BlogActionsProps {
-  blog: {
-    id: string;
-    title: string;
-    slug: string;
-    stats: {
-      likes: number;
-      comments: number;
-      views: number;
-    };
-  };
+  blog: BlogPost;
 }
 
 export function BlogActions({ blog }: BlogActionsProps) {
@@ -129,19 +121,6 @@ export function BlogActions({ blog }: BlogActionsProps) {
         variant="outline"
         size="sm"
         className="gap-2"
-        onClick={() =>
-          document
-            .querySelector("#comments")
-            ?.scrollIntoView({ behavior: "smooth" })
-        }
-      >
-        <MessageSquare className="h-4 w-4" />
-      </Button>
-
-      <Button
-        variant="outline"
-        size="sm"
-        className="gap-2"
         onClick={handleBookmark}
         disabled={isLoading || toggleBookmark.isPending}
       >
@@ -151,6 +130,20 @@ export function BlogActions({ blog }: BlogActionsProps) {
           <Bookmark className="h-4 w-4" />
         )}
         <span>{interaction?.bookmarkCount ?? 0}</span>
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-2"
+        onClick={() =>
+          document
+            .querySelector("#comments")
+            ?.scrollIntoView({ behavior: "smooth" })
+        }
+      >
+        <MessageSquare className="h-4 w-4" />
+        <span>{blog.commentCount || 0}</span>
       </Button>
 
       <Separator orientation="vertical" className="h-6" />

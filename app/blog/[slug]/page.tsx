@@ -22,7 +22,7 @@ export async function generateMetadata({
     const resolvedParams = await params;
     const blog = await blogService.getBlogById(resolvedParams.slug);
     console.log("Generating metadata for blog:", blog);
-
+    let createdAt = new Date(blog.date).toISOString();
     return {
       title: `${blog.title} - Blogify`,
       description: blog.description,
@@ -30,7 +30,7 @@ export async function generateMetadata({
         title: blog.title,
         description: blog.description,
         type: "article",
-        publishedTime: blog.date,
+        publishedTime: createdAt,
         authors: [blog.author.name],
         images: [
           {

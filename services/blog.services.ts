@@ -1,8 +1,8 @@
-import { Blog } from "@/lib/types/data.interface";
+import { BlogPost } from "@/lib/types/data.interface";
 import { httpService } from "./http.services";
 
 export interface BlogsResponse {
-  blogs: Blog[];
+  blogs: BlogPost[];
   total: number;
   page: number;
   limit: number;
@@ -50,7 +50,7 @@ export class BlogService {
     return BlogService.instance;
   }
 
-  async createBlog(data: CreateBlogDto): Promise<Blog> {
+  async createBlog(data: CreateBlogDto): Promise<BlogPost> {
     const formData = new FormData();
     // Append fields individually with proper handling
     Object.entries(data).forEach(([key, value]) => {
@@ -70,10 +70,13 @@ export class BlogService {
       }
     });
     // Don't override Content-Type header - let browser set it automatically with boundary
-    return httpService.post<Blog>("/api/blogs", formData);
+    return httpService.post<BlogPost>("/api/blogs", formData);
   }
 
-  async updateBlog(id: string, data: Partial<CreateBlogDto>): Promise<Blog> {
+  async updateBlog(
+    id: string,
+    data: Partial<CreateBlogDto>
+  ): Promise<BlogPost> {
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -92,7 +95,7 @@ export class BlogService {
       }
     });
     // Don't override Content-Type header - let browser set it automatically with boundary
-    return httpService.put<Blog>(`/api/blogs/blog/${id}`, formData);
+    return httpService.put<BlogPost>(`/api/blogs/blog/${id}`, formData);
   }
 
   async deleteBlog(id: string): Promise<void> {
@@ -105,8 +108,8 @@ export class BlogService {
     );
   }
 
-  async getBlogById(id: string): Promise<Blog> {
-    return httpService.get<Blog>(`/api/blogs/blog/${id}`);
+  async getBlogById(id: string): Promise<BlogPost> {
+    return httpService.get<BlogPost>(`/api/blogs/blog/${id}`);
   }
 
   async searchBlogs(
