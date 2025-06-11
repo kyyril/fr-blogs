@@ -5,6 +5,13 @@ interface FollowStatusResponse {
   is_following: boolean;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+}
+
 export class UserService {
   private static instance: UserService;
 
@@ -60,6 +67,14 @@ export class UserService {
         "Content-Type": "multipart/form-data",
       },
     });
+  }
+
+  async getFollowers(userId: string): Promise<UserProfile[]> {
+    return httpService.get<UserProfile[]>(`/api/users/${userId}/followers`);
+  }
+
+  async getFollowing(userId: string): Promise<UserProfile[]> {
+    return httpService.get<UserProfile[]>(`/api/users/${userId}/following`);
   }
 }
 

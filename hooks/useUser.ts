@@ -77,3 +77,19 @@ export const useUser = () => {
     updateProfile,
   };
 };
+
+export const useFollowers = (userId: string) => {
+  return useQuery({
+    queryKey: ["followers", userId],
+    queryFn: () => userService.getFollowers(userId),
+    enabled: !!userId,
+  });
+};
+
+export const useFollowing = (userId: string) => {
+  return useQuery({
+    queryKey: ["following", userId],
+    queryFn: () => userService.getFollowing(userId),
+    enabled: !!userId,
+  });
+};

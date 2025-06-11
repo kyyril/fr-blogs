@@ -1,50 +1,34 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { Search } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Search } from "lucide-react";
+import Link from "next/link";
+import { useFollowing } from "@/hooks/useUser";
+import { UserProfile } from "@/services/user.services";
 
 interface UserFollowingProps {
   userId: string;
 }
 
-// Mock following data
-const mockFollowing = [
-  {
-    id: '6',
-    name: 'Emily Rodriguez',
-    image: 'https://i.pravatar.cc/150?u=emily@example.com',
-    bio: 'Data scientist and machine learning enthusiast',
-  },
-  {
-    id: '7',
-    name: 'James Taylor',
-    image: 'https://i.pravatar.cc/150?u=james@example.com',
-    bio: 'Backend developer and system architect',
-  },
-  {
-    id: '8',
-    name: 'Olivia Johnson',
-    image: 'https://i.pravatar.cc/150?u=olivia@example.com',
-    bio: 'UI/UX designer and design systems expert',
-  },
-];
-
 export function UserFollowing({ userId }: UserFollowingProps) {
-  const [following, setFollowing] = useState(mockFollowing);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { data: following, isLoading, isError } = useFollowing(userId);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredFollowing = following.filter((user) =>
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError) {
+    return <div>Error loading following</div>;
+  }
+
+  const filteredFollowing = (following || []).filter((user: UserProfile) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleUnfollow = (followingId: string) => {
-    setFollowing(following.filter((user) => user.id !== followingId));
-  };
 
   return (
     <div className="space-y-6">
@@ -72,20 +56,22 @@ export function UserFollowing({ userId }: UserFollowingProps) {
                   className="flex items-center gap-3"
                 >
                   <Avatar>
-                    <AvatarImage src={user.image} alt={user.name} />
+                    <AvatarImage src={user.avatar} alt={user.name} />
                     <AvatarFallback>{user.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium">{user.name}</p>
-                    <p className="text-sm text-muted-foreground">{user.bio}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
                   </div>
                 </Link>
-                <Button
+                {/* <Button
                   variant="secondary"
                   onClick={() => handleUnfollow(user.id)}
                 >
                   Following
-                </Button>
+                </Button> */}
               </div>
               <Separator className="mt-4" />
             </div>
