@@ -8,6 +8,8 @@ import { format } from "date-fns";
 import { blogService } from "@/services/blog.services";
 import { BlogDetailClient } from "@/components/blog/blog-detail-client";
 import NotFound from "@/components/blog/not-found";
+import { Suspense } from "react";
+import BlogDetailSkeleton from "@/components/blog/Loading/BlogDetailSkeleton";
 
 interface BlogPageProps {
   params: Promise<{ slug: string }> | { slug: string };
@@ -56,7 +58,8 @@ export async function generateMetadata({
   }
 }
 
-export default async function BlogPage({
+// Separate component for blog content
+async function BlogContent({
   params,
 }: {
   params: Promise<{ slug: string }> | { slug: string };
@@ -165,5 +168,17 @@ export default async function BlogPage({
       {/* Client-side components with blog data */}
       <BlogDetailClient blog={blog} />
     </div>
+  );
+}
+
+export default function BlogPage({
+  params,
+}: {
+  params: Promise<{ slug: string }> | { slug: string };
+}) {
+  return (
+    <Suspense fallback={<BlogDetailSkeleton />}>
+      <BlogContent params={params} />
+    </Suspense>
   );
 }
