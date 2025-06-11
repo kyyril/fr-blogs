@@ -96,12 +96,6 @@ export function Header() {
 
           {isAuthenticated ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/blog/create">
-                  <PenSquare className="mr-2 h-4 w-4" />
-                  Write
-                </Link>
-              </Button>
               <UserNav />
             </>
           ) : (

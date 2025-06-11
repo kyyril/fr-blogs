@@ -24,23 +24,45 @@ import { BlogPost } from "@/lib/types/data.interface";
 import BookmarksComponent from "@/components/profile/bookmark";
 import ProfileLoadingSkeleton from "@/components/profile/Loading/ProfileLoadingSkeleton";
 
+import { useRouter } from "next/navigation";
+
 interface ProfilePageProps {
   params: {
     userId: string;
   };
+  searchParams: {
+    tab?: string;
+  };
 }
 
-export default function ProfilePage({ params }: ProfilePageProps) {
+export default function ProfilePage({
+  params,
+  searchParams,
+}: ProfilePageProps) {
   const { getProfile, followUser, unfollowUser, followStatus } = useUser();
   const { user: currentUser } = useAuth(); // Get current logged-in user
   const [isFollowing, setIsFollowing] = useState(false);
   const [followStatusLoading, setFollowStatusLoading] = useState(false);
+  const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
 
   const { data: user, isLoading, error } = getProfile(params.userId);
 
-  // Check follow status when component mounts
+  useEffect(() => {
+    if (searchParams.tab === "settings") {
+      setIsSettingsOpen(true);
+    } else {
+      setIsSettingsOpen(false);
+    }
+
+    if (searchParams.tab === "bookmarks") {
+      setIsBookmarksOpen(true);
+    } else {
+      setIsBookmarksOpen(false);
+    }
+  }, [searchParams.tab]);
+
   useEffect(() => {
     if (currentUser && params.userId !== currentUser.id) {
       setFollowStatusLoading(true);
@@ -145,13 +167,19 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                   <div className="gap-2 flex items-center">
                     <Button
                       variant="ghost"
-                      onClick={() => setIsSettingsOpen(true)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(`/profile/${params.userId}?tab=settings`);
+                      }}
                     >
                       Settings
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setIsBookmarksOpen(true)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        router.push(`/profile/${params.userId}?tab=bookmarks`);
+                      }}
                     >
                       Bookmarks
                     </Button>
@@ -167,7 +195,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                       </DialogHeader>
                       <ProfileSettings
                         userId={params.userId}
-                        onClose={() => setIsSettingsOpen(false)}
+                        onClose={() => {
+                          setIsSettingsOpen(false);
+                          router.push(`/profile/${params.userId}`);
+                        }}
                       />
                     </DialogContent>
                   </Dialog>
@@ -182,7 +213,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                       </DialogHeader>
                       <BookmarksComponent
                         userId={params.userId}
-                        onClose={() => setIsBookmarksOpen(false)}
+                        onClose={() => {
+                          setIsBookmarksOpen(false);
+                          router.push(`/profile/${params.userId}`);
+                        }}
                       />
                     </DialogContent>
                   </Dialog>

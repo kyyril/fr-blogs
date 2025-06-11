@@ -12,7 +12,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Settings, FileText, Heart, LogOut } from "lucide-react";
+import {
+  User,
+  Settings,
+  FileText,
+  Heart,
+  LogOut,
+  PenSquare,
+} from "lucide-react";
 import Link from "next/link";
 
 export function UserNav() {
@@ -41,7 +48,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link
-              href={`/profile/${user?.id}`}
+              href={`/profile/${user?.id}?`}
               className="flex w-full cursor-pointer items-center"
             >
               <User className="mr-2 h-4 w-4" />
@@ -50,7 +57,7 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href="/bookmarks"
+              href={`/profile/${user?.id}?tab=bookmarks`}
               className="flex w-full cursor-pointer items-center"
             >
               <Heart className="mr-2 h-4 w-4" />
@@ -59,11 +66,20 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href={`/profile/${user?.id}`}
+              href={`/profile/${user?.id}?tab=settings`}
               className="flex w-full cursor-pointer items-center"
             >
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link
+              href="/blog/create"
+              className="flex w-full cursor-pointer items-center"
+            >
+              <PenSquare className="mr-2 h-4 w-4" />
+              <span>Write</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
