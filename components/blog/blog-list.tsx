@@ -10,6 +10,7 @@ import { BlogPost } from "@/lib/types/data.interface";
 interface BlogListProps {
   featured?: boolean;
   category?: string;
+  tags?: string;
   limit?: number;
   isProfile?: boolean;
   blog?: BlogPost[]; // Static blog list for profile pages
@@ -20,6 +21,7 @@ interface BlogListProps {
 export function BlogList({
   featured = false,
   category,
+  tags,
   limit,
   isProfile = false,
   blog: staticBlogs,
@@ -32,13 +34,15 @@ export function BlogList({
   const { ref, inView } = useInView();
 
   // Use appropriate hook based on category filter - only when not using static blogs
-  const { getBlogs, getBlogsByCategory } = useBlog();
+  const { getBlogs, getBlogsByCategory, getBlogsByTags } = useBlog();
 
   // Determine which query to use - only when not using static blogs
   const shouldUseQuery = !staticBlogs;
   const query = shouldUseQuery
     ? category
       ? getBlogsByCategory(category, currentPage, limit || 9)
+      : tags
+      ? getBlogsByTags(tags, currentPage, limit || 9)
       : getBlogs(currentPage, limit || 9)
     : { data: null, isLoading: false, error: null, isFetching: false };
 
@@ -112,9 +116,11 @@ export function BlogList({
               ? "No blogs published yet."
               : category
               ? `No blogs found in "${category}" category.`
+              : tags
+              ? `No blogs found with "${tags}" tags.`
               : "No blogs found."}
           </p>
-          {category && !isProfile && (
+          {(category || tags) && !isProfile && (
             <Button
               variant="link"
               className="mt-2"

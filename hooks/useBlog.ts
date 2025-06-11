@@ -192,6 +192,14 @@ export const useBlog = () => {
     });
   };
 
+  const getBlogsByTags = (tags: string, page = 1, limit = 10) => {
+    return useQuery<BlogsResponse>({
+      queryKey: ["blogs", "tags", tags, page, limit],
+      queryFn: () => blogService.getBlogsByTags(tags, page, limit),
+      enabled: !!tags,
+    });
+  };
+
   return {
     getUserBookmarks, // New method
     getBlogFeatured,
@@ -199,6 +207,7 @@ export const useBlog = () => {
     searchBlogs,
     getBlogById,
     getBlogsByCategory,
+    getBlogsByTags,
     getBlogInteraction, // New method
     createBlog,
     updateBlog,

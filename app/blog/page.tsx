@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 export default async function BlogsPage({
   searchParams,
 }: {
-  searchParams: { category?: string; search?: string };
+  searchParams: { category?: string; search?: string; tags?: string };
 }) {
-  const { category, search } = await searchParams;
+  const { category, search, tags } = await searchParams;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -22,6 +22,8 @@ export default async function BlogsPage({
         <p className="text-muted-foreground">
           {category
             ? `Browse all posts in ${category}`
+            : tags
+            ? `Browse all posts tagged with ${tags}`
             : search
             ? `Search results for "${search}"`
             : "Discover stories, ideas, and expertise from writers on any topic"}
@@ -36,7 +38,7 @@ export default async function BlogsPage({
         </aside>
 
         <div>
-          <BlogList category={category} />
+          <BlogList category={category} tags={tags} />
         </div>
       </div>
     </div>

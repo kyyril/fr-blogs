@@ -141,6 +141,16 @@ export class BlogService {
     );
   }
 
+  async getBlogsByTags(
+    tags: string,
+    page = 1,
+    limit = 10
+  ): Promise<BlogsResponse> {
+    return httpService.get<BlogsResponse>(
+      `/api/blogs/tags/${tags}?page=${page}&limit=${limit}`
+    );
+  }
+
   async recordView(id: string): Promise<void> {
     return httpService.post(`/api/blogs/blog/${id}/view`);
   }

@@ -175,32 +175,6 @@ export default function AboutPage() {
           </Button>
         </div>
       </section>
-
-      <Separator className="my-12" />
-      <section className="mb-16">
-        <h2 className="text-3xl font-semibold mb-6 text-primary">
-          What Our Readers Say
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-secondary p-6 rounded-lg shadow-md">
-            <p className="italic mb-4">
-              "Blogify has become my go-to source for learning new web
-              development techniques and staying ahead of the curve. The content
-              is always insightful and actionable!"
-            </p>
-            <p className="font-medium text-right">- Alex, Frontend Developer</p>
-          </div>
-          <div className="bg-secondary p-6 rounded-lg shadow-md">
-            <p className="italic mb-4">
-              "I love the depth of research and the easy-to-follow tutorials on
-              Blogify. It’s truly inspiring and has helped me grow my skills!"
-            </p>
-            <p className="font-medium text-right">
-              - Maria, Junior Software Engineer
-            </p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
