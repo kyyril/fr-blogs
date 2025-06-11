@@ -8,6 +8,16 @@ export interface BlogsResponse {
   limit: number;
 }
 
+export interface BookmarksResponse {
+  bookmarks: BlogPost[];
+  pagination: {
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+  };
+}
+
 export interface CreateBlogDto {
   title: string;
   description: string;
@@ -69,7 +79,6 @@ export class BlogService {
         }
       }
     });
-    // Don't override Content-Type header - let browser set it automatically with boundary
     return httpService.post<BlogPost>("/api/blogs", formData);
   }
 
@@ -94,7 +103,6 @@ export class BlogService {
         }
       }
     });
-    // Don't override Content-Type header - let browser set it automatically with boundary
     return httpService.put<BlogPost>(`/api/blogs/blog/${id}`, formData);
   }
 
@@ -136,7 +144,7 @@ export class BlogService {
     return httpService.post(`/api/blogs/blog/${id}/view`);
   }
 
-  // New methods for like/bookmark functionality
+  // Interaction methods
   async getBlogInteraction(id: string): Promise<BlogInteractionResponse> {
     return httpService.get<BlogInteractionResponse>(
       `/api/blogs/blog/${id}/interaction`
@@ -150,6 +158,13 @@ export class BlogService {
   async toggleBookmark(id: string): Promise<ToggleBookmarkResponse> {
     return httpService.post<ToggleBookmarkResponse>(
       `/api/blogs/blog/${id}/bookmark`
+    );
+  }
+
+  // New method for getting user bookmarks
+  async getUserBookmarks(page = 1, limit = 10): Promise<BookmarksResponse> {
+    return httpService.get<BookmarksResponse>(
+      `/api/users/bookmarks?page=${page}&limit=${limit}`
     );
   }
 }

@@ -1,18 +1,19 @@
-import { BlogList } from '@/components/blog/blog-list';
-import { CategoryFilter } from '@/components/blog/category-filter';
-import { Metadata } from 'next';
+import { BlogList } from "@/components/blog/blog-list";
+import { CategoryFilter } from "@/components/blog/category-filter";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'All Blogs - Blogify',
-  description: 'Discover stories, ideas, and expertise from writers on any topic',
+  title: "All Blogs - Blogify",
+  description:
+    "Discover stories, ideas, and expertise from writers on any topic",
 };
 
-export default function BlogsPage({
+export default async function BlogsPage({
   searchParams,
 }: {
   searchParams: { category?: string; search?: string };
 }) {
-  const { category, search } = searchParams;
+  const { category, search } = await searchParams;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -23,7 +24,7 @@ export default function BlogsPage({
             ? `Browse all posts in ${category}`
             : search
             ? `Search results for "${search}"`
-            : 'Discover stories, ideas, and expertise from writers on any topic'}
+            : "Discover stories, ideas, and expertise from writers on any topic"}
         </p>
       </div>
 

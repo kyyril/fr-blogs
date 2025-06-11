@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { ProfileSettings } from "@/components/profile/profile-settings";
 import { BlogPost } from "@/lib/types/data.interface";
+import BookmarksComponent from "@/components/profile/bookmark";
 
 interface ProfilePageProps {
   params: {
@@ -34,6 +35,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followStatusLoading, setFollowStatusLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Add this state
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false); // Add this state
 
   const { data: user, isLoading, error } = getProfile(params.userId);
 
@@ -145,12 +147,20 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
               {isOwnProfile && (
                 <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsSettingsOpen(true)}
-                  >
-                    Settings
-                  </Button>
+                  <div className="gap-2 flex items-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsSettingsOpen(true)}
+                    >
+                      Settings
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsBookmarksOpen(true)}
+                    >
+                      Bookmarks
+                    </Button>
+                  </div>
 
                   <Dialog
                     open={isSettingsOpen}
@@ -163,6 +173,21 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                       <ProfileSettings
                         userId={params.userId}
                         onClose={() => setIsSettingsOpen(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog
+                    open={isBookmarksOpen}
+                    onOpenChange={setIsBookmarksOpen}
+                  >
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Your Bookmarks</DialogTitle>
+                      </DialogHeader>
+                      <BookmarksComponent
+                        userId={params.userId}
+                        onClose={() => setIsBookmarksOpen(false)}
                       />
                     </DialogContent>
                   </Dialog>

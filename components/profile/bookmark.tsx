@@ -1,10 +1,4 @@
 import React, { useState } from "react";
-import { useBlog } from "@/hooks/useBlog";
-import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Heart,
   MessageSquare,
@@ -13,223 +7,220 @@ import {
   User,
   BookmarkX,
   Loader2,
+  BookOpen,
+  AlertCircle,
 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { useBlog } from "@/hooks/useBlog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 
-export default function BookmarksPage() {
-  const { user } = useAuth();
-  const { getBookmarkedBlogs, toggleBookmark } = useBlog();
+export default function BookmarksComponent({
+  userId,
+  onClose,
+}: {
+  userId: string;
+  onClose: () => void;
+}) {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
+
+  const { getUserBookmarks, toggleBookmark } = useBlog();
 
   const {
     data: bookmarksData,
     isLoading,
-    isError,
     error,
-  } = getBookmarkedBlogs(currentPage, limit, {
-    enabled: !!user,
-  });
+    refetch,
+  } = getUserBookmarks(currentPage, limit);
+
+  const bookmarks = bookmarksData?.bookmarks || [];
+  const pagination = bookmarksData?.pagination;
+  const totalPages = pagination?.totalPages || 1;
 
   const handleRemoveBookmark = async (blogId: string) => {
     try {
       await toggleBookmark.mutateAsync(blogId);
-      toast({
-        title: "Bookmark removed",
-        description: "The blog has been removed from your bookmarks",
-      });
+      refetch();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove bookmark",
-        variant: "destructive",
-      });
+      console.error("Failed to remove bookmark:", error);
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center space-y-4 p-6">
-            <div className="text-6xl">🔒</div>
-            <h2 className="text-2xl font-bold text-center">
-              Authentication Required
-            </h2>
-            <p className="text-center text-muted-foreground">
-              Please sign in to view your bookmarked blogs.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const formatNumber = (num: number) => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + "k";
+    }
+    return num.toString();
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading your bookmarks...</span>
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2 text-muted-foreground">
+            Loading your bookmarks...
+          </span>
         </div>
       </div>
     );
   }
 
-  if (isError) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center space-y-4 p-6">
-            <div className="text-6xl">❌</div>
-            <h2 className="text-2xl font-bold text-center">
-              Error Loading Bookmarks
-            </h2>
-            <p className="text-center text-muted-foreground">
-              {error?.message ||
-                "Something went wrong while loading your bookmarks."}
+      <div className="max-w-4xl mx-auto p-6">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <AlertCircle className="h-16 w-16 text-destructive mb-4" />
+            <h3 className="text-xl font-semibold mb-2">
+              Failed to load bookmarks
+            </h3>
+            <p className="text-muted-foreground max-w-sm mb-4">
+              There was an error loading your bookmarks. Please try again.
             </p>
+            <Button onClick={() => refetch()} variant="outline">
+              Try Again
+            </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  const totalPages = Math.ceil((bookmarksData?.total || 0) / limit);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            My Bookmarks
-          </h1>
-          <p className="text-muted-foreground">
-            {bookmarksData?.total || 0} bookmarked blog
-            {(bookmarksData?.total || 0) !== 1 ? "s" : ""}
-          </p>
-        </div>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <p className="text-muted-foreground">
+          {pagination?.totalCount || 0} saved article
+          {(pagination?.totalCount || 0) !== 1 ? "s" : ""}
+        </p>
+      </div>
 
-        {/* Bookmarks List */}
-        {!bookmarksData?.blogs?.length ? (
-          <Card className="w-full">
-            <CardContent className="flex flex-col items-center space-y-4 p-12">
-              <div className="text-8xl">📚</div>
-              <h2 className="text-2xl font-bold text-center">
-                No Bookmarks Yet
-              </h2>
-              <p className="text-center text-muted-foreground max-w-md">
-                Start bookmarking blogs you want to read later. They'll appear
-                here for easy access.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {bookmarksData.blogs.map((blog) => (
-              <Card
-                key={blog.id}
-                className="group hover:shadow-lg transition-all duration-200"
-              >
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1 space-y-3">
-                      {/* Blog Title */}
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors cursor-pointer">
+      {/* Bookmarks List */}
+      {bookmarks.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No bookmarks yet</h3>
+            <p className="text-muted-foreground max-w-sm">
+              Start bookmarking articles you want to read later. They'll appear
+              here for easy access.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {bookmarks.map((blog) => (
+            <Card
+              key={blog.id}
+              className="group hover:shadow-md transition-shadow"
+            >
+              <CardContent className="p-6">
+                <div className="flex gap-4">
+                  {/* Content */}
+                  <div className="flex-1 space-y-4">
+                    {/* Title and Description */}
+                    <div className="space-y-2">
+                      <Link
+                        href={`/blog/${blog.id}`}
+                        className="block group-hover:underline"
+                      >
+                        <h3 className="text-xl font-semibold leading-tight hover:text-primary transition-colors cursor-pointer">
                           {blog.title}
                         </h3>
-                        <p className="text-muted-foreground text-sm line-clamp-2">
-                          {blog.description}
-                        </p>
+                      </Link>
+                      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
+                        {blog.description}
+                      </p>
+                    </div>
+
+                    {/* Categories */}
+                    {blog.categories && blog.categories.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {blog.categories.slice(0, 4).map((category, index) => (
+                          <Badge key={index} variant="secondary">
+                            {category}
+                          </Badge>
+                        ))}
+                        {blog.categories.length > 4 && (
+                          <Badge variant="outline">
+                            +{blog.categories.length - 4}
+                          </Badge>
+                        )}
                       </div>
+                    )}
 
-                      {/* Categories */}
-                      {blog.categories && blog.categories.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {blog.categories
-                            .slice(0, 3)
-                            .map((category, index) => (
-                              <Badge
-                                key={index}
-                                variant="secondary"
-                                className="text-xs"
-                              >
-                                {category}
-                              </Badge>
-                            ))}
-                          {blog.categories.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{blog.categories.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Blog Meta */}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          <span>{blog.author?.name || "Anonymous"}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formatDate(blog.createdAt)}</span>
-                        </div>
+                    {/* Meta Information */}
+                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <User className="h-4 w-4" />
+                        <span>{blog.author?.name || "Anonymous"}</span>
                       </div>
-
-                      {/* Blog Stats */}
-                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Heart className="h-4 w-4" />
-                          <span>{blog.stats?.likes || 0}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MessageSquare className="h-4 w-4" />
-                          <span>{blog.stats?.comments || 0}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          <span>{blog.stats?.views || 0}</span>
-                        </div>
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-4 w-4" />
+                        <span>{formatDate(blog.date)}</span>
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRemoveBookmark(blog.id)}
-                        disabled={toggleBookmark.isPending}
-                        className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
-                      >
-                        {toggleBookmark.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <BookmarkX className="h-4 w-4" />
-                        )}
-                      </Button>
+                    {/* Stats */}
+                    <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Heart className="h-4 w-4" />
+                        <span>{formatNumber(blog.likeCount || 0)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{formatNumber(blog.commentCount || 0)}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Eye className="h-4 w-4" />
+                        <span>{formatNumber(blog.viewCount || 0)}</span>
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
+                  {/* Actions */}
+                  <div className="flex flex-col justify-start">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveBookmark(blog.id)}
+                      disabled={toggleBookmark.isPending}
+                      className="text-muted-foreground hover:text-destructive"
+                      title="Remove bookmark"
+                    >
+                      {toggleBookmark.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <BookmarkX className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <>
+          <Separator />
+          <div className="flex justify-center items-center gap-2">
             <Button
               variant="outline"
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -238,15 +229,16 @@ export default function BookmarksPage() {
               Previous
             </Button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 const pageNum = i + 1;
                 return (
                   <Button
                     key={pageNum}
-                    variant={currentPage === pageNum ? "default" : "outline"}
-                    size="sm"
+                    variant={currentPage === pageNum ? "default" : "ghost"}
+                    size="icon"
                     onClick={() => setCurrentPage(pageNum)}
+                    className="w-10 h-10"
                   >
                     {pageNum}
                   </Button>
@@ -264,8 +256,8 @@ export default function BookmarksPage() {
               Next
             </Button>
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

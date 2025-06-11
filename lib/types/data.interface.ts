@@ -37,7 +37,7 @@ export interface BlogPost {
   slug: string;
   description: string;
   content: string;
-  date: Date | string;
+  date: Date | any;
   featured: boolean;
   image: string;
   readingTime: number;

@@ -4,6 +4,7 @@ import {
   CreateBlogDto,
   BlogsResponse,
   BlogInteractionResponse,
+  BookmarksResponse,
 } from "@/services/blog.services";
 import { BlogPost } from "@/lib/types/data.interface";
 
@@ -176,7 +177,16 @@ export const useBlog = () => {
     },
   });
 
+  // New hook for getting user bookmarks
+  const getUserBookmarks = (page = 1, limit = 10) => {
+    return useQuery<BookmarksResponse>({
+      queryKey: ["bookmarks", page, limit],
+      queryFn: () => blogService.getUserBookmarks(page, limit),
+    });
+  };
+
   return {
+    getUserBookmarks, // New method
     getBlogs,
     searchBlogs,
     getBlogById,
