@@ -73,13 +73,6 @@ export function BlogCard({
               </div>
             </Link>
           )}
-          {!isProfile && (
-            <Link href={`/blog/share/${blog.id}`}>
-              <div className="rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background">
-                <Share className="h-4 w-4 text-muted-foreground font-light hover:text-primary" />
-              </div>
-            </Link>
-          )}
         </div>
         <Link href={`/blog/${blog.id}`}>
           <Image

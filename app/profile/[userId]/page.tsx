@@ -233,13 +233,13 @@ export default function ProfilePage({
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold">
-                  {user._count?.followers || 0}
+                  {user._count?.following || 0}
                 </p>
                 <p className="text-sm text-muted-foreground">Followers</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold">
-                  {user._count?.following || 0}
+                  {user._count?.followers || 0}
                 </p>
                 <p className="text-sm text-muted-foreground">Following</p>
               </div>

@@ -22,7 +22,7 @@ export function FeaturedBlogsSkeleton() {
             <CardHeader className="p-4 pb-2">
               {" "}
               {/* Use CardHeader */}
-              <div className="flex py-4 items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex py-1 items-center gap-2 text-sm text-muted-foreground">
                 <Skeleton className="h-4 w-20" /> {/* Skeleton for date */}
                 <Skeleton className="h-4 w-4" /> {/* Skeleton for separator */}
                 <Skeleton className="h-4 w-16" />{" "}
