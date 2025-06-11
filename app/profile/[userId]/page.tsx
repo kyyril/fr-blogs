@@ -34,8 +34,8 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   const { user: currentUser } = useAuth(); // Get current logged-in user
   const [isFollowing, setIsFollowing] = useState(false);
   const [followStatusLoading, setFollowStatusLoading] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false); // Add this state
-  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false); // Add this state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
 
   const { data: user, isLoading, error } = getProfile(params.userId);
 
@@ -199,20 +199,24 @@ export default function ProfilePage({ params }: ProfilePageProps) {
 
             <div className="mt-4 flex items-center justify-center gap-6 sm:justify-start">
               <div className="text-center">
-                <p className="text-xl font-bold">{user._count?.blogs}</p>
+                <p className="text-xl font-bold">{user._count?.blogs || 0}</p>
                 <p className="text-sm text-muted-foreground">Blogs</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{user._count?.followers}</p>
-                <p className="text-sm text-muted-foreground">Following</p>
+                <p className="text-xl font-bold">
+                  {user._count?.followers || 0}
+                </p>
+                <p className="text-sm text-muted-foreground">Followers</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold">{user._count?.following}</p>
-                <p className="text-sm text-muted-foreground">Followers</p>
+                <p className="text-xl font-bold">
+                  {user._count?.following || 0}
+                </p>
+                <p className="text-sm text-muted-foreground">Following</p>
               </div>
             </div>
 
-            {/* Social Links - Add these fields to your User interface if needed */}
+            {/* Social Links */}
             {(user.twitterAcc || user.githubAcc || user.linkedinAcc) && (
               <div className="mt-4 flex items-center justify-center gap-2 sm:justify-start">
                 {user.twitterAcc && (
@@ -262,7 +266,13 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <TabsTrigger value="following">Following</TabsTrigger>
         </TabsList>
         <TabsContent value="blogs" className="mt-6">
-          <UserBlogList blogs={user.blogs} />
+          <BlogList
+            blog={user.blogs}
+            featured={false}
+            isProfile={true}
+            currentUser={currentUser}
+            profileUser={user}
+          />
         </TabsContent>
         <TabsContent value="followers" className="mt-6">
           <UserFollowers userId={params.userId} />
@@ -271,61 +281,6 @@ export default function ProfilePage({ params }: ProfilePageProps) {
           <UserFollowing userId={params.userId} />
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-// Component to display user's blogs
-function UserBlogList({ blogs }: { blogs: BlogPost[] | undefined }) {
-  const { user: currentUser } = useAuth(); // Add this at the top
-
-  if (!blogs || blogs.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No blogs published yet.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {blogs.map((blog) => (
-        <div
-          key={blog.id}
-          className="group relative rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
-        >
-          {currentUser?.id === blog.authorId && (
-            <div className="absolute right-4 top-4 z-10">
-              <Link href={`/blog/edit/${blog.id}`}>
-                <div className="rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background">
-                  <PenIcon className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                </div>
-              </Link>
-            </div>
-          )}
-          <div className="aspect-video relative mb-4 overflow-hidden rounded-md">
-            <Image
-              src={blog.image}
-              alt={blog.title}
-              fill
-              className="object-cover transition-transform group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </div>
-          <Link href={`/blog/${blog.id}`}>
-            <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">
-              {blog.title}
-            </h3>
-          </Link>
-          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-            {blog.description}
-          </p>
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{new Date(blog.date).toLocaleDateString()}</span>
-            <span>{blog.readingTime} min read</span>
-          </div>
-        </div>
-      ))}
     </div>
   );
 }

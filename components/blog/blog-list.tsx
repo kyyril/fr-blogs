@@ -11,27 +11,50 @@ interface BlogListProps {
   featured?: boolean;
   category?: string;
   limit?: number;
+  isProfile?: boolean;
+  blog?: BlogPost[]; // Static blog list for profile pages
+  currentUser?: any; // Current authenticated user
+  profileUser?: any; // Profile owner user
 }
 
-export function BlogList({ featured = false, category, limit }: BlogListProps) {
+export function BlogList({
+  featured = false,
+  category,
+  limit,
+  isProfile = false,
+  blog: staticBlogs,
+  currentUser,
+  profileUser,
+}: BlogListProps) {
   const [allBlogs, setAllBlogs] = useState<BlogPost[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { ref, inView } = useInView();
 
-  // Use appropriate hook based on category filter
+  // Use appropriate hook based on category filter - only when not using static blogs
   const { getBlogs, getBlogsByCategory } = useBlog();
 
-  // Determine which query to use
-  const query = category
-    ? getBlogsByCategory(category, currentPage, limit || 9)
-    : getBlogs(currentPage, limit || 9);
+  // Determine which query to use - only when not using static blogs
+  const shouldUseQuery = !staticBlogs;
+  const query = shouldUseQuery
+    ? category
+      ? getBlogsByCategory(category, currentPage, limit || 9)
+      : getBlogs(currentPage, limit || 9)
+    : { data: null, isLoading: false, error: null, isFetching: false };
 
   const { data, isLoading, error, isFetching } = query;
 
-  // Update blogs when data changes
+  // Initialize with static blogs if provided
   useEffect(() => {
-    if (data?.blogs) {
+    if (staticBlogs) {
+      setAllBlogs(staticBlogs);
+      setHasMore(false); // No pagination for static blogs
+    }
+  }, [staticBlogs]);
+
+  // Update blogs when data changes (for dynamic loading)
+  useEffect(() => {
+    if (data?.blogs && shouldUseQuery) {
       if (currentPage === 1) {
         setAllBlogs(data.blogs);
       } else {
@@ -42,20 +65,21 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
       const totalPages = Math.ceil(data.total / data.limit);
       setHasMore(data.page < totalPages);
     }
-  }, [data, currentPage]);
+  }, [data, currentPage, shouldUseQuery]);
 
-  // Auto-load more when scrolling into view (infinite scroll)
+  // Auto-load more when scrolling into view (infinite scroll) - only for dynamic loading
   useEffect(() => {
-    if (inView && hasMore && !isFetching && !limit) {
+    if (inView && hasMore && !isFetching && !limit && shouldUseQuery) {
       loadMore();
     }
-  }, [inView, hasMore, isFetching, limit]);
+  }, [inView, hasMore, isFetching, limit, shouldUseQuery]);
 
   const loadMore = () => {
-    if (hasMore && !isFetching) {
+    if (hasMore && !isFetching && shouldUseQuery) {
       setCurrentPage((prev) => prev + 1);
     }
   };
+
   console.log("All Blogs:", allBlogs);
 
   // Handle error state
@@ -84,11 +108,13 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
       <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed p-8 text-center">
         <div>
           <p className="text-muted-foreground">
-            {category
+            {isProfile
+              ? "No blogs published yet."
+              : category
               ? `No blogs found in "${category}" category.`
               : "No blogs found."}
           </p>
-          {category && (
+          {category && !isProfile && (
             <Button
               variant="link"
               className="mt-2"
@@ -110,11 +136,19 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
     <div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {allBlogs.map((blog) => (
-          <BlogCard key={blog.id} blog={blog} featured={featured} />
+          <BlogCard
+            key={blog.id}
+            blog={blog}
+            featured={featured}
+            isProfile={isProfile}
+            currentUser={currentUser}
+            profileUser={profileUser}
+          />
         ))}
 
-        {/* Loading skeletons */}
+        {/* Loading skeletons - only for dynamic loading */}
         {(isLoading || isFetching) &&
+          shouldUseQuery &&
           Array.from({ length: 3 }).map((_, i) => (
             <div
               key={`skeleton-${i}`}
@@ -138,8 +172,8 @@ export function BlogList({ featured = false, category, limit }: BlogListProps) {
           ))}
       </div>
 
-      {/* Load more button - visible only if hasMore is true and not at the limit */}
-      {hasMore && !limit && allBlogs.length > 0 && (
+      {/* Load more button - visible only if hasMore is true and not at the limit and using dynamic loading */}
+      {hasMore && !limit && allBlogs.length > 0 && shouldUseQuery && (
         <div className="mt-8 flex justify-center" ref={ref}>
           <Button
             onClick={loadMore}
