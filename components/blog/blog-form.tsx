@@ -22,8 +22,16 @@ import { Badge } from "@/components/ui/badge";
 import { X, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useBlog } from "@/hooks/useBlog";
-import { BlogEditor } from "./MDXeditor";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+const BlogEditor = dynamic(
+  () => import("./MDXeditor").then((mod) => mod.BlogEditor),
+  {
+    ssr: false,
+    loading: () => <p>Loading editor...</p>,
+  }
+);
 
 const formSchema = z.object({
   title: z

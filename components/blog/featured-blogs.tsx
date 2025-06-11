@@ -4,13 +4,14 @@
 
 import { BlogCard } from "@/components/blog/blog-card";
 import { useBlog } from "@/hooks/useBlog";
+import { FeaturedBlogsSkeleton } from "@/components/blog/Loading/FeaturedBlogsSkeleton";
 
 export function FeaturedBlogs() {
   const { getBlogFeatured } = useBlog();
   const { data: featuredBlogs, isLoading, isError } = getBlogFeatured(2);
 
   if (isLoading) {
-    return <div>Loading featured blogs...</div>;
+    return <FeaturedBlogsSkeleton />;
   }
 
   if (isError || !featuredBlogs) {
