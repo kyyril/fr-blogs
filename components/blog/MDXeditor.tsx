@@ -5,6 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Eye,
   Edit3,
   Download,
@@ -14,16 +22,29 @@ import {
   Maximize2,
   Minimize2,
   Lightbulb, // Change from LightbulbIcon to Lightbulb
+  Bold,
+  Italic,
+  Underline,
+  Code,
+  List,
+  ListOrdered,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Link,
+  Image,
+  Table,
+  Quote,
+  Heading1,
+  Heading2,
+  Heading3,
+  Undo,
+  Redo,
 } from "lucide-react";
 import { MDXRenderer } from "./MDXRenderer";
 import { cn } from "@/lib/utils";
-import {
-  mockBlogPost,
-  mockQuickStart,
-  Classic,
-  ArchLinux,
-  mockCosmetics,
-} from "@/lib/mock-data-editor";
+import { mockBlogPost, mockQuickStart } from "@/lib/mock-data-editor";
+import { useCallback } from "react";
 
 interface BlogEditorProps {
   initialContent?: string;
@@ -82,9 +103,7 @@ export function BlogEditor({
     }
   };
 
-  const handleInsertSample = async (
-    sample: "blog" | "quick" | "classic" | "arch" | "cosmetics"
-  ) => {
+  const handleInsertSample = async (sample: "blog" | "quick") => {
     setIsLoading(true);
     try {
       let sampleContent;
@@ -95,21 +114,70 @@ export function BlogEditor({
         case "quick":
           sampleContent = mockQuickStart;
           break;
-        case "classic":
-          sampleContent = Classic;
-          break;
-        case "arch":
-          sampleContent = ArchLinux;
-          break;
-        case "cosmetics":
-          sampleContent = mockCosmetics;
-          break;
       }
       handleContentChange(sampleContent);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleToolbarButtonClick = useCallback(
+    (command: string, event: React.MouseEvent<HTMLButtonElement>) => {
+      // Basic implementation - can be expanded
+      event.preventDefault(); // Prevent form submission
+      if (isFormEditor) {
+        event.stopPropagation(); // Stop event from propagating to the form
+      }
+      let newContent = content;
+      switch (command) {
+        case "bold":
+          newContent = content + "**bold**";
+          break;
+        case "italic":
+          newContent = content + "*italic*";
+          break;
+        case "underline":
+          newContent = content + "<u>underline</u>";
+          break;
+        case "code":
+          newContent = content + "```bash\ncode\n```";
+          break;
+        case "bulletList":
+          newContent = content + "- bullet list";
+          break;
+        case "orderedList":
+          newContent = content + "1. ordered list";
+          break;
+        case "h1":
+          newContent = content + "# Heading 1";
+          break;
+        case "h2":
+          newContent = content + "## Heading 2";
+          break;
+        case "h3":
+          newContent = content + "### Heading 3";
+          break;
+        case "quote":
+          newContent = content + "> quote";
+          break;
+        case "link":
+          newContent = content + "[link](https://example.com)";
+          break;
+        case "image":
+          newContent =
+            content + "![image](https://dummyimage.com/600x400/000/fff)";
+          break;
+        case "table":
+          newContent =
+            content + "| header 1 | header 2 |\n|---|---| \n| row 1 | row 2 |";
+          break;
+        default:
+          break;
+      }
+      handleContentChange(newContent);
+    },
+    [content, handleContentChange, isFormEditor]
+  );
 
   return (
     <div
@@ -126,113 +194,66 @@ export function BlogEditor({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="relative group">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Lightbulb className="h-4 w-4" />
-              <span className="hidden md:inline">Examples</span>
-            </Button>
-            <div className="absolute right-0 mt-2 w-48 py-2 bg-popover border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleInsertSample("blog");
-                }}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
-                disabled={isLoading}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2"
               >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span> Loading...
-                  </span>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4" />
-                    Full Blog Post
-                  </>
-                )}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleInsertSample("quick");
-                }}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span> Loading...
-                  </span>
-                ) : (
-                  <>
-                    <Lightbulb className="h-4 w-4" />
-                    Quick Start Guide
-                  </>
-                )}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleInsertSample("classic");
-                }}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span> Loading...
-                  </span>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4" />
-                    Classic Template
-                  </>
-                )}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleInsertSample("arch");
-                }}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span> Loading...
-                  </span>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4" />
-                    Arch Linux Guide
-                  </>
-                )}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleInsertSample("cosmetics");
-                }}
-                className="w-full px-4 py-2 text-sm text-left hover:bg-accent hover:text-accent-foreground transition-colors flex items-center gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="animate-spin">⏳</span> Loading...
-                  </span>
-                ) : (
-                  <>
-                    <FileText className="h-4 w-4" />
-                    Cosmetics Sample
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+                <Lightbulb className="h-4 w-4" />
+                <span className="hidden md:inline">Examples</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Insert Example</DialogTitle>
+                <DialogDescription>
+                  Choose an example to insert into the editor.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Button
+                  variant={"outline"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleInsertSample("blog");
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span> Loading...
+                    </span>
+                  ) : (
+                    <>
+                      <FileText className="h-4 w-4" />
+                      Full Blog Post
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant={"outline"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleInsertSample("quick");
+                  }}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span> Loading...
+                    </span>
+                  ) : (
+                    <>
+                      <Lightbulb className="h-4 w-4" />
+                      Quick Start Guide
+                    </>
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <input
             type="file"
@@ -276,6 +297,101 @@ export function BlogEditor({
         </div>
       </div>
 
+      {/* Toolbar */}
+      <div className="flex items-center p-2 border-b gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("bold", e)}
+        >
+          <Bold className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("italic", e)}
+        >
+          <Italic className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("underline", e)}
+        >
+          <Underline className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("code", e)}
+        >
+          <Code className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("bulletList", e)}
+        >
+          <List className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("orderedList", e)}
+        >
+          <ListOrdered className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("h1", e)}
+        >
+          <Heading1 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("h2", e)}
+        >
+          <Heading2 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("h3", e)}
+        >
+          <Heading3 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("quote", e)}
+        >
+          <Quote className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("link", e)}
+        >
+          <Link className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("image", e)}
+        >
+          <Image className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => handleToolbarButtonClick("table", e)}
+        >
+          <Table className="h-4 w-4" />
+        </Button>
+      </div>
+
       <Tabs
         value={activeTab}
         onValueChange={(value: string) => setActiveTab(value as any)}
@@ -309,6 +425,7 @@ export function BlogEditor({
                 )}
                 placeholder="Write your content in MDX..."
                 disabled={isLoading}
+                rows={20}
               />
               {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/50">

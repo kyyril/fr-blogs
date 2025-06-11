@@ -92,18 +92,14 @@ export function MDXRenderer({ content }: MDXRendererProps) {
               {children}
             </h1>
           ),
-          h2: ({ children, ...props }) => (
-            <motion.h2
-              variants={fadeInUp}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true }}
+          h2: ({ children, className, ...props }) => (
+            <h2
               className="text-3xl font-bold mt-16 mb-6 text-foreground/90 scroll-mt-20 flex items-center gap-3"
               {...props}
             >
               <div className="w-1 h-8 bg-primary/60 rounded-full"></div>
               {children}
-            </motion.h2>
+            </h2>
           ),
           h3: ({ children, ...props }) => (
             <h3
@@ -183,14 +179,13 @@ export function MDXRenderer({ content }: MDXRendererProps) {
           },
 
           // Simplified blockquote
-          blockquote: ({ children, ...props }) => (
+          blockquote: ({ children }) => (
             <motion.blockquote
               variants={fadeInUp}
               initial="initial"
               whileInView="animate"
               viewport={{ once: true }}
               className="my-8 border-l-2 border-primary/30 pl-6 py-3 text-foreground/60 italic"
-              {...props}
             >
               {children}
             </motion.blockquote>
