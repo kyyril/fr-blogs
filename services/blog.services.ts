@@ -3,6 +3,7 @@ import { httpService } from "./http.services";
 
 export interface BlogsResponse {
   featuredBlogs: BlogPost[];
+  blogs: BlogPost[];
   total: number;
   page: number;
   limit: number;

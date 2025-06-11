@@ -33,7 +33,7 @@ export function BlogCard({
   // Use passed currentUser or fallback to hook
   const user = currentUser || authUser;
 
-  let createdAt = new Date(blog.date);
+  let createdAt = blog.date;
 
   // Determine if current user can edit this blog
   const canEdit = user?.id === blog.authorId;
@@ -93,7 +93,7 @@ export function BlogCard({
       <div className={`flex flex-1 flex-col ${featured ? "md:w-3/5" : ""}`}>
         <CardHeader className="p-4 pb-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {/* <span>{formatDistanceToNow(createdAt, { addSuffix: true })}</span> */}
+            <span>{formatDistanceToNow(createdAt, { addSuffix: true })}</span>
             <span>•</span>
             <span>{blog.readingTime || 0} min read</span>
           </div>

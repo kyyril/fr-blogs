@@ -54,11 +54,11 @@ export function BlogList({
 
   // Update blogs when data changes (for dynamic loading)
   useEffect(() => {
-    if (data?.featuredBlogs && shouldUseQuery) {
+    if (data?.blogs && shouldUseQuery) {
       if (currentPage === 1) {
-        setAllBlogs(data.featuredBlogs);
+        setAllBlogs(data.blogs);
       } else {
-        setAllBlogs((prev) => [...prev, ...data.featuredBlogs]);
+        setAllBlogs((prev) => [...prev, ...data.blogs]);
       }
 
       // Check if there are more pages

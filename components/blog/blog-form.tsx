@@ -35,7 +35,12 @@ const formSchema = z.object({
     .min(10, "Description must be at least 10 characters")
     .max(200, "Description must be less than 200 characters"),
   content: z.string().min(50, "Content must be at least 50 characters"),
-  image: z.instanceof(File, "Please upload a valid image file").optional(),
+  image: z
+    .any()
+    .refine((file) => file instanceof File, {
+      message: "Please upload a valid image file",
+    })
+    .optional(),
   categories: z.array(z.string()).min(1, "Please select at least one category"),
   tags: z.array(z.string()).min(1, "Please add at least one tag"),
   readingTime: z.number().min(1, "Reading time must be at least 1 minute"),
