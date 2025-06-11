@@ -17,8 +17,9 @@ interface BlogCardProps {
   blog: BlogPost;
   featured?: boolean;
   isProfile?: boolean;
-  currentUser?: any; // User object from auth
-  profileUser?: any; // Profile owner user object
+  currentUser?: any;
+  profileUser?: any;
+  isRelated?: boolean;
 }
 
 export function BlogCard({
@@ -27,6 +28,7 @@ export function BlogCard({
   isProfile = false,
   currentUser,
   profileUser,
+  isRelated = false,
 }: BlogCardProps) {
   const { user: authUser } = useAuth();
 

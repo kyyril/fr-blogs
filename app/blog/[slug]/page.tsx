@@ -69,7 +69,6 @@ async function BlogContent({
   try {
     const resolvedParams = await params;
     blog = await blogService.getBlogById(resolvedParams.slug);
-    console.log("Blog metadata:", blog);
   } catch (error) {
     return <NotFound />;
   }

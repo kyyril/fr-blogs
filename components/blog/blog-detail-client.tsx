@@ -223,10 +223,10 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
           {/* Related Blogs */}
           <div className="mb-8">
             <h2 className="mb-6 text-2xl font-bold">Related Blogs</h2>
-            {/* <RelatedBlogs
+            <RelatedBlogs
               currentBlogId={blog.id}
               category={blog.categories[0]}
-            /> */}
+            />
           </div>
         </div>
 

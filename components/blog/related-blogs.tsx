@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { BlogCard } from '@/components/blog/blog-card';
-import { mockBlogs } from '@/lib/mock-data';
+import { useBlog } from "@/hooks/useBlog";
+import { BlogList } from "./blog-list";
+import { BlogCard } from "./blog-card";
 
 interface RelatedBlogsProps {
   currentBlogId: string;
@@ -9,10 +10,23 @@ interface RelatedBlogsProps {
 }
 
 export function RelatedBlogs({ currentBlogId, category }: RelatedBlogsProps) {
-  // Filter blogs by category and exclude the current blog
-  const relatedBlogs = mockBlogs
-    .filter((blog) => blog.category === category && blog.id !== currentBlogId)
-    .slice(0, 3);
+  const { getBlogsByCategory } = useBlog();
+
+  const {
+    data: relatedBlogsData,
+    isLoading,
+    isError,
+  } = getBlogsByCategory(category);
+
+  const relatedBlogs = relatedBlogsData?.blogs || [];
+
+  if (isLoading) {
+    return <p>Loading related blogs...</p>;
+  }
+
+  if (isError) {
+    return <p>Error loading related blogs.</p>;
+  }
 
   if (relatedBlogs.length === 0) {
     return (
@@ -21,11 +35,12 @@ export function RelatedBlogs({ currentBlogId, category }: RelatedBlogsProps) {
       </div>
     );
   }
-
+  console.log("Related Blogs Data:", relatedBlogs);
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Pass the related blogs data to the BlogList component */}
       {relatedBlogs.map((blog) => (
-        <BlogCard key={blog.id} blog={blog} />
+        <BlogCard key={blog.id} blog={blog} isRelated={true} />
       ))}
     </div>
   );
