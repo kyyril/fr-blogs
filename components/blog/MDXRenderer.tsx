@@ -120,7 +120,7 @@ export function MDXRenderer({ content }: MDXRendererProps) {
           ),
 
           // Clean code block
-          code: ({ node, inline, className, children, ...props }) => {
+          code: ({ node, inline, className, children, ...props }: any) => {
             const match = /language-(\w+)/.exec(className || "");
             const language = match ? match[1] : "";
             const code = String(children).replace(/\n$/, "");

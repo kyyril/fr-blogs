@@ -183,7 +183,7 @@ export function BlogEditor({
     <div
       className={cn(
         "flex flex-col h-full border rounded-lg",
-        isFullscreen && "fixed inset-0 z-50 bg-background",
+        isFullscreen && "fixed inset-0 z-50 bg-background overflow-auto",
         className
       )}
     >
