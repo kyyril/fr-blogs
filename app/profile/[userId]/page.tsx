@@ -22,6 +22,7 @@ import {
 import { ProfileSettings } from "@/components/profile/profile-settings";
 import { BlogPost } from "@/lib/types/data.interface";
 import BookmarksComponent from "@/components/profile/bookmark";
+import ProfileLoadingSkeleton from "@/components/profile/Loading/ProfileLoadingSkeleton";
 
 interface ProfilePageProps {
   params: {
@@ -72,13 +73,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
   };
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto max-w-4xl px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </div>
-    );
+    return <ProfileLoadingSkeleton />;
   }
 
   if (error || !user) {
