@@ -185,8 +185,16 @@ export const useBlog = () => {
     });
   };
 
+  const getBlogFeatured = (limit = 5) => {
+    return useQuery<BlogsResponse>({
+      queryKey: ["blogs", "featured", limit],
+      queryFn: () => blogService.getBlogFeatured(limit),
+    });
+  };
+
   return {
     getUserBookmarks, // New method
+    getBlogFeatured,
     getBlogs,
     searchBlogs,
     getBlogById,

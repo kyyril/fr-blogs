@@ -2,7 +2,7 @@ import { BlogPost } from "@/lib/types/data.interface";
 import { httpService } from "./http.services";
 
 export interface BlogsResponse {
-  blogs: BlogPost[];
+  featuredBlogs: BlogPost[];
   total: number;
   page: number;
   limit: number;
@@ -26,7 +26,7 @@ export interface CreateBlogDto {
   tags: string[];
   readingTime: number;
   featured: boolean;
-  image: File;
+  image?: File;
 }
 
 export interface BlogInteractionResponse {
@@ -166,6 +166,10 @@ export class BlogService {
     return httpService.get<BookmarksResponse>(
       `/api/users/bookmarks?page=${page}&limit=${limit}`
     );
+  }
+
+  async getBlogFeatured(limit = 5): Promise<BlogsResponse> {
+    return httpService.get<BlogsResponse>(`/api/blogs/featured?limit=${limit}`);
   }
 }
 
