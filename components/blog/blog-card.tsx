@@ -7,7 +7,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageSquare, Eye, PenIcon } from "lucide-react";
+import { Heart, MessageSquare, Eye, PenIcon, Share } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { BlogPost } from "@/lib/types/data.interface";
@@ -55,7 +55,7 @@ export function BlogCard({
 
   return (
     <Card
-      className={`overflow-hidden transition-all hover:shadow-md ${
+      className={`overflow-hidden transition-all hover:shadow-md group ${
         featured ? "flex flex-col md:flex-row" : ""
       }`}
     >
@@ -63,15 +63,22 @@ export function BlogCard({
         className={`relative ${featured ? "h-48 md:h-auto md:w-2/5" : "h-48"}`}
       >
         {/* Show edit button only if user can edit and it's on profile page */}
-        {canEdit && isProfile && (
-          <div className="absolute right-4 top-4 z-10">
+        <div className="absolute right-2 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+          {canEdit && isProfile && (
             <Link href={`/blog/edit/${blog.id}`}>
               <div className="rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background">
-                <PenIcon className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                <PenIcon className="h-4 w-4 font-light text-muted-foreground hover:text-primary" />
               </div>
             </Link>
-          </div>
-        )}
+          )}
+          {!isProfile && (
+            <Link href={`/blog/share/${blog.id}`}>
+              <div className="rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background">
+                <Share className="h-4 w-4 text-muted-foreground font-light hover:text-primary" />
+              </div>
+            </Link>
+          )}
+        </div>
         <Link href={`/blog/${blog.id}`}>
           <Image
             src={blog.image}
@@ -97,8 +104,8 @@ export function BlogCard({
             <span>•</span>
             <span>{blog.readingTime || 0} min read</span>
           </div>
-          <Link href={`/blog/${blog.id}`} className="group">
-            <h3 className="line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
+          <Link href={`/blog/${blog.id}`}>
+            <h3 className="line-clamp-1 text-xl font-bold transition-colors group-hover:text-primary">
               {blog.title || "Untitled Blog Post"}
             </h3>
           </Link>
