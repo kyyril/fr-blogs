@@ -43,12 +43,7 @@ const formSchema = z.object({
     .min(10, "Description must be at least 10 characters")
     .max(200, "Description must be less than 200 characters"),
   content: z.string().min(50, "Content must be at least 50 characters"),
-  image: z
-    .any()
-    .refine((file) => file instanceof File, {
-      message: "Please upload a valid image file",
-    })
-    .optional(),
+  image: z.any().optional(),
   categories: z.array(z.string()).min(1, "Please select at least one category"),
   tags: z.array(z.string()).min(1, "Please add at least one tag"),
   readingTime: z.number().min(1, "Reading time must be at least 1 minute"),
@@ -187,8 +182,8 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
   };
 
   const handleCategoryChange = (category: string, checked: boolean) => {
-    let newCategories;
-    if (checked) {
+    let newCategories: string[];
+    if ((checked === true) as boolean as boolean as boolean) {
       newCategories = [...categories, category];
     } else {
       newCategories = categories.filter((c) => c !== category);
@@ -303,6 +298,17 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
+                      if (file) {
+                        const maxSize = 5 * 1024 * 1024; // 5MB
+                        if (file.size > maxSize) {
+                          toast({
+                            title: "File size too large",
+                            description: "Image must be less than 5MB.",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                      }
                       onChange(file);
                     }}
                     {...field}
@@ -551,7 +557,7 @@ export function BlogForm({ slug, isEditing = false }: BlogFormProps) {
             ) : (
               "Publish Blog"
             )}
-          </Button>
+          </Button>{" "}
         </div>
       </form>
     </Form>

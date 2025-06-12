@@ -12,13 +12,13 @@ import { Suspense } from "react";
 import BlogDetailSkeleton from "@/components/blog/Loading/BlogDetailSkeleton";
 
 interface BlogPageProps {
-  params: Promise<{ slug: string }> | { slug: string };
+  params: { slug: string };
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }> | { slug: string };
+  params: { slug: string };
 }): Promise<Metadata> {
   try {
     const resolvedParams = await params;
@@ -59,11 +59,7 @@ export async function generateMetadata({
 }
 
 // Separate component for blog content
-async function BlogContent({
-  params,
-}: {
-  params: Promise<{ slug: string }> | { slug: string };
-}) {
+async function BlogContent({ params }: { params: { slug: string } }) {
   let blog;
 
   try {
@@ -83,9 +79,7 @@ async function BlogContent({
       <div className="mb-8 text-center">
         <div className="mb-4 flex flex-wrap justify-center gap-2">
           {blog.categories.map((category, index) => (
-            <Badge key={index} variant="secondary">
-              {category}
-            </Badge>
+            <Badge key={index}>{category}</Badge>
           ))}
         </div>
 
@@ -144,7 +138,7 @@ async function BlogContent({
         {blog.tags && blog.tags.length > 0 && (
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {blog.tags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
+              <Badge key={index} className="text-xs">
                 #{tag}
               </Badge>
             ))}
@@ -170,11 +164,7 @@ async function BlogContent({
   );
 }
 
-export default function BlogPage({
-  params,
-}: {
-  params: Promise<{ slug: string }> | { slug: string };
-}) {
+export default function BlogPage({ params }: { params: { slug: string } }) {
   return (
     <Suspense fallback={<BlogDetailSkeleton />}>
       <BlogContent params={params} />

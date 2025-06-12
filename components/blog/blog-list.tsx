@@ -55,7 +55,6 @@ export function BlogList({
       setHasMore(false); // No pagination for static blogs
     }
   }, [staticBlogs]);
-
   // Update blogs when data changes (for dynamic loading)
   useEffect(() => {
     if (data?.blogs && shouldUseQuery) {
@@ -95,7 +94,7 @@ export function BlogList({
             Failed to load blogs. Please try again.
           </p>
           <Button
-            variant="link"
+            variant="outline"
             className="mt-2"
             onClick={() => window.location.reload()}
           >
@@ -122,7 +121,7 @@ export function BlogList({
           </p>
           {(category || tags) && !isProfile && (
             <Button
-              variant="link"
+              variant="outline"
               className="mt-2"
               onClick={() => {
                 setCurrentPage(1);
