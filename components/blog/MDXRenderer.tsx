@@ -13,6 +13,7 @@ import { Copy, Check, ExternalLink, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 // Update the animation variants
 const fadeInUp = {
@@ -224,6 +225,21 @@ export function MDXRenderer({ content }: MDXRendererProps) {
               {children}
             </strong>
           ),
+          img: ({ src, alt, width, height, ...props }) => {
+            if (!src) return null;
+            return (
+              <div className="relative my-8 h-auto w-full overflow-hidden rounded-lg">
+                <Image
+                  src={src}
+                  alt={alt || ""}
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  {...props}
+                />
+              </div>
+            );
+          },
         }}
       >
         {content}

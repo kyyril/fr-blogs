@@ -6,13 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { blogService } from "@/services/blog.services";
-import { BlogDetailClient } from "@/components/blog/blog-detail-client";
 import NotFound from "@/components/blog/not-found";
 import { Suspense } from "react";
 import BlogDetailSkeleton from "@/components/blog/Loading/BlogDetailSkeleton";
+import { BlogDetailClientWrapper } from "@/components/blog/BlogDetailClientWrapper";
 
-interface BlogPageProps {
-  params: Promise<{ slug: string }>;
+// Define revalidate time for ISR (e.g., every 60 seconds)
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const response = await blogService.getBlogs(1, 1000); // Fetch up to 1000 blogs
+  const slugs = response.blogs.map((blog) => ({
+    slug: blog.id, // Assuming blog.id is the slug
+  }));
+  console.log("Generated static params:", slugs);
+  return slugs;
 }
 
 export async function generateMetadata({
@@ -59,12 +67,11 @@ export async function generateMetadata({
 }
 
 // Separate component for blog content
-async function BlogContent({ params }: { params: Promise<{ slug: string }> }) {
+async function BlogContent({ params }: { params: { slug: string } }) {
   let blog;
 
   try {
-    const resolvedParams = await params;
-    blog = await blogService.getBlogById(resolvedParams.slug);
+    blog = await blogService.getBlogById(params.slug);
   } catch (error) {
     return <NotFound />;
   }
@@ -159,19 +166,21 @@ async function BlogContent({ params }: { params: Promise<{ slug: string }> }) {
       </div>
 
       {/* Client-side components with blog data */}
-      <BlogDetailClient blog={blog} />
+      <BlogDetailClientWrapper blog={blog} />
     </div>
   );
 }
 
-export default function BlogPage({
+export default async function BlogPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  // BlogContent is now an async component, so it can directly receive the resolved params
+  const resolvedParams = await params;
   return (
     <Suspense fallback={<BlogDetailSkeleton />}>
-      <BlogContent params={params} />
+      <BlogContent params={resolvedParams} />
     </Suspense>
   );
 }
