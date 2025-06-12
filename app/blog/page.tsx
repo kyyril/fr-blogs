@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function BlogsPage({
   searchParams,
 }: {
-  searchParams: { category?: string; search?: string; tags?: string };
+  searchParams: Promise<{ category?: string; search?: string; tags?: string }>;
 }) {
   const { category, search, tags } = await searchParams;
 

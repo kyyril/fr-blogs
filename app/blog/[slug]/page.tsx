@@ -12,13 +12,13 @@ import { Suspense } from "react";
 import BlogDetailSkeleton from "@/components/blog/Loading/BlogDetailSkeleton";
 
 interface BlogPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   try {
     const resolvedParams = await params;
@@ -59,7 +59,7 @@ export async function generateMetadata({
 }
 
 // Separate component for blog content
-async function BlogContent({ params }: { params: { slug: string } }) {
+async function BlogContent({ params }: { params: Promise<{ slug: string }> }) {
   let blog;
 
   try {
@@ -164,7 +164,11 @@ async function BlogContent({ params }: { params: { slug: string } }) {
   );
 }
 
-export default function BlogPage({ params }: { params: { slug: string } }) {
+export default function BlogPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   return (
     <Suspense fallback={<BlogDetailSkeleton />}>
       <BlogContent params={params} />

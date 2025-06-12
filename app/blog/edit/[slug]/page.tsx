@@ -7,17 +7,19 @@ export const metadata: Metadata = {
 };
 
 interface EditBlogPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
-export default function EditBlogPage({ params }: EditBlogPageProps) {
-  console.log(params.slug, "paramsss");
+export default async function EditBlogPage({ params }: EditBlogPageProps) {
+  const resolvedParams = await params;
+  console.log(resolvedParams.slug, "paramsss");
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <h1 className="mb-6 text-3xl font-bold">Edit Your Blog</h1>
-      <BlogForm slug={params.slug} isEditing />
+      <BlogForm slug={resolvedParams.slug} isEditing />
     </div>
   );
 }
