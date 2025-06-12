@@ -59,11 +59,11 @@ export function LoginForm() {
             });
           }
         }}
-        onError={(error) => {
-          console.error("Google Login Error:", error);
+        onError={() => {
+          console.error("Google Login Error: An unknown error occurred.");
           toast({
             title: "Login failed",
-            description: "Google login error",
+            description: "Google login failed due to an unknown error.",
             variant: "destructive",
           });
         }}
