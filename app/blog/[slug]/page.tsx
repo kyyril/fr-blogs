@@ -11,6 +11,8 @@ import { Suspense } from "react";
 import BlogDetailSkeleton from "@/components/blog/Loading/BlogDetailSkeleton";
 import { BlogDetailClientWrapper } from "@/components/blog/BlogDetailClientWrapper";
 
+export const runtime = "edge";
+
 // Define revalidate time for ISR (e.g., every 60 seconds)
 export const revalidate = 60;
 
