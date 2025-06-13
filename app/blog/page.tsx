@@ -2,6 +2,8 @@ import { BlogList } from "@/components/blog/blog-list";
 import { CategoryFilter } from "@/components/blog/category-filter";
 import { Metadata } from "next";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "All Blogs - synblog",
   description:

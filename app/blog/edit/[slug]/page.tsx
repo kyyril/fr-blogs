@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import { BlogForm } from "@/components/blog/blog-form";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "Edit Blog - synblog",
   description: "Edit your blog post on synblog",
