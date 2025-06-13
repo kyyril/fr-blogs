@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 
 export class TokenService {
   private static instance: TokenService;
-  private readonly TOKEN_KEY = "auth_token";
+  private readonly TOKEN_KEY = "access_token";
 
   private constructor() {}
 

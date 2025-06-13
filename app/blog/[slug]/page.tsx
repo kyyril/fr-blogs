@@ -11,30 +11,6 @@ import { Suspense } from "react";
 import BlogDetailSkeleton from "@/components/blog/Loading/BlogDetailSkeleton";
 import { BlogDetailClientWrapper } from "@/components/blog/BlogDetailClientWrapper";
 
-// Define revalidate time for ISR (e.g., every 60 seconds)
-export const revalidate = 60;
-
-export async function generateStaticParams() {
-  // Skip data fetching during build if SKIP_BUILD_DATA_FETCH is true
-  if (process.env.SKIP_BUILD_DATA_FETCH === "true") {
-    console.log("Skipping generateStaticParams data fetch during build.");
-    return []; // Return an empty array or a minimal set of slugs
-  }
-
-  try {
-    const response = await blogService.getBlogs(1, 1000); // Fetch up to 1000 blogs
-    const slugs = response.blogs.map((blog) => ({
-      slug: blog.id, // Assuming blog.id is the slug
-    }));
-    console.log("Generated static params:", slugs);
-    return slugs;
-  } catch (error) {
-    console.error("Error fetching blogs for generateStaticParams:", error);
-    // Fallback to an empty array or a minimal set of slugs on error
-    return [];
-  }
-}
-
 export async function generateMetadata({
   params,
 }: {
@@ -43,7 +19,6 @@ export async function generateMetadata({
   try {
     const resolvedParams = await params;
     const blog = await blogService.getBlogById(resolvedParams.slug);
-    console.log("Generating metadata for blog:", blog);
     let createdAt = new Date(blog.date).toISOString();
     return {
       title: `${blog.title} - synblog`,

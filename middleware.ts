@@ -1,6 +1,44 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Define the API endpoint for token refresh based on auth.services.ts
+const REFRESH_TOKEN_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`;
+
+// Function to refresh the access token
+async function refreshAccessToken(refreshToken: string): Promise<{
+  accessToken?: string;
+  newRefreshToken?: string;
+  error?: string;
+}> {
+  try {
+    const response = await fetch(REFRESH_TOKEN_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Manually send refresh token in body as authService.refreshToken implies a POST with refresh token
+        // In a real scenario, this might be sent as a cookie or Authorization header,
+        // but for middleware, explicit body might be needed if not automatically forwarded.
+      },
+      body: JSON.stringify({ refreshToken }), // Assuming the backend expects it in the body
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to refresh token");
+    }
+
+    const data = await response.json();
+    // Assuming the response contains new accessToken and refreshToken
+    return {
+      accessToken: data.accessToken,
+      newRefreshToken: data.refreshToken,
+    };
+  } catch (error: any) {
+    console.error("Token refresh failed:", error.message);
+    return { error: error.message };
+  }
+}
+
 // JWT decode function for Edge Runtime compatibility
 function decodeJWT(token: string): any {
   try {
@@ -64,13 +102,15 @@ function isTokenExpired(payload: any): boolean {
   return payload.exp < currentTime;
 }
 
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   // Check for access_token (matching your cookie data)
-  const accessToken = req.cookies.get("access_token")?.value;
-  const refreshToken = req.cookies.get("refresh_token")?.value;
+  let accessToken = req.cookies.get("access_token")?.value;
+  let refreshToken = req.cookies.get("refresh_token")?.value;
 
   let isAuthenticated = false;
   let userPayload = null;
+
+  const response = NextResponse.next(); // Initialize response here
 
   // Validate access token
   if (accessToken && accessToken.trim().length > 0) {
@@ -80,13 +120,50 @@ export default function middleware(req: NextRequest) {
       if (userPayload && !isTokenExpired(userPayload)) {
         isAuthenticated = true;
       } else if (refreshToken) {
-        // Token expired but refresh token exists
-        // In a real app, you'd attempt to refresh the token here
-        // For now, we'll treat as unauthenticated
-        console.log("Access token expired, refresh token available");
+        // Token expired but refresh token exists, attempt to refresh
+        console.log("Access token expired, attempting to refresh token...");
+        const {
+          accessToken: newAccessToken,
+          newRefreshToken,
+          error,
+        } = await refreshAccessToken(refreshToken);
+
+        if (newAccessToken && newRefreshToken) {
+          accessToken = newAccessToken;
+          refreshToken = newRefreshToken;
+          userPayload = decodeJWT(accessToken); // Decode new access token
+          if (userPayload && !isTokenExpired(userPayload)) {
+            isAuthenticated = true;
+
+            // Set new cookies
+            response.cookies.set("access_token", accessToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              maxAge: 60 * 60, // 1 hour
+              path: "/",
+            });
+            response.cookies.set("refresh_token", refreshToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              maxAge: 7 * 24 * 60 * 60, // 7 days
+              path: "/",
+            });
+            console.log("Tokens refreshed successfully.");
+          } else {
+            console.log("Refreshed access token is invalid or expired.");
+          }
+        } else {
+          console.error("Failed to refresh token:", error);
+          // Clear tokens if refresh failed to prevent infinite loops
+          response.cookies.delete("access_token");
+          response.cookies.delete("refresh_token");
+        }
       }
     } catch (error) {
       console.error("Error processing access token in middleware:", error);
+      // Clear tokens on any processing error
+      response.cookies.delete("access_token");
+      response.cookies.delete("refresh_token");
     }
   }
 
@@ -121,9 +198,6 @@ export default function middleware(req: NextRequest) {
       callback && callback.startsWith("/") ? callback : "/blog"; // Redirect to /blog instead of /dashboard
     return NextResponse.redirect(new URL(redirectUrl, req.url));
   }
-
-  // Create response
-  const response = NextResponse.next();
 
   // Add security headers
   response.headers.set("X-Frame-Options", "DENY");
