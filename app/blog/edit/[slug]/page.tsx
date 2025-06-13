@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { BlogForm } from "@/components/blog/blog-form";
 
 export const metadata: Metadata = {
-  title: "Edit Blog - Blogify",
-  description: "Edit your blog post on Blogify",
+  title: "Edit Blog - synblog",
+  description: "Edit your blog post on synblog",
 };
 
 interface EditBlogPageProps {

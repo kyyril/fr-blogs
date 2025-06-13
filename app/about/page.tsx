@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Blogify - Your Go-To Platform for Insightful Content",
+  title: "About synblog - Your Go-To Platform for Insightful Content",
   description:
-    "Learn more about Blogify, the platform dedicated to sharing knowledge and inspiration. Discover the mission, values, and the passionate team behind Blogify.",
+    "Learn more about synblog, the platform dedicated to sharing knowledge and inspiration. Discover the mission, values, and the passionate team behind synblog.",
   keywords: [
     "about us",
-    "Blogify",
+    "synblog",
     "blog platform",
     "mission",
     "vision",
@@ -20,27 +20,27 @@ export const metadata = {
     "community",
   ],
   openGraph: {
-    title: "About Blogify - Your Go-To Platform for Insightful Content",
+    title: "About synblog - Your Go-To Platform for Insightful Content",
     description:
-      "Learn more about Blogify, the platform dedicated to sharing knowledge and inspiration. Discover the mission, values, and the passionate team behind Blogify.",
-    url: "https://www.blogify.com/about",
+      "Learn more about synblog, the platform dedicated to sharing knowledge and inspiration. Discover the mission, values, and the passionate team behind synblog.",
+    url: "https://www.synblog.com/about",
     type: "website",
     images: [
       {
-        url: "https://www.blogify.com/images/og-image-about.jpg",
+        url: "https://www.synblog.com/images/og-image-about.jpg",
         width: 1200,
         height: 630,
-        alt: "About Blogify",
+        alt: "About synblog",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@", // Replace with your Twitter handle
-    title: "About Blogify - Your Go-To Platform for Insightful Content",
+    title: "About synblog - Your Go-To Platform for Insightful Content",
     description:
-      "Learn more about Blogify, the platform dedicated to sharing knowledge and inspiration. Discover the mission, values, and the passionate team behind Blogify.",
-    image: "https://www.blogify.com/images/twitter-image-about.jpg", // Replace with a relevant image for Twitter
+      "Learn more about synblog, the platform dedicated to sharing knowledge and inspiration. Discover the mission, values, and the passionate team behind synblog.",
+    image: "https://www.synblog.com/images/twitter-image-about.jpg", // Replace with a relevant image for Twitter
   },
 };
 
@@ -48,7 +48,7 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
       <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 text-primary">
-        About Blogify
+        About synblog
       </h1>
       <p className="text-lg text-center text-muted-foreground mb-12">
         Your Hub for Authentic Stories and Valuable Insights
@@ -63,7 +63,7 @@ export default function AboutPage() {
           <div className="flex-shrink-0">
             <Image
               src="https://res.cloudinary.com/da5ggxk01/image/upload/v1730253647/profile_xqq1pv.png"
-              alt="Khairil - Author of Blogify"
+              alt="Khairil - Author of synblog"
               width={180}
               height={180}
               className="rounded-full object-cover shadow-lg"
@@ -76,7 +76,7 @@ export default function AboutPage() {
               and its impact on our daily lives.
             </p>
             <p className="text-base mb-4">
-              I started Blogify because I believe in the power of sharing
+              I started synblog because I believe in the power of sharing
               knowledge and connecting with others through compelling
               narratives. My motivation stems from a desire to demystify complex
               topics and empower others to navigate the ever-evolving world of
@@ -101,7 +101,7 @@ export default function AboutPage() {
           About This Blog
         </h2>
         <p className="text-base mb-4">
-          Blogify is dedicated to empowering developers and tech enthusiasts
+          synblog is dedicated to empowering developers and tech enthusiasts
           through practical advice, insights, and resources. Our primary goal is
           to be a reliable source of information and inspiration for our
           readers.
@@ -113,7 +113,7 @@ export default function AboutPage() {
           providing content that resonates with their interests and needs.
         </p>
         <p className="text-base">
-          Through Blogify, you'll gain actionable tips, in-depth tutorials,
+          Through synblog, you'll gain actionable tips, in-depth tutorials,
           inspiring stories, and step-by-step guides that will help you improve
           your skills and stay ahead in the tech industry. Our vision is to
           cultivate a vibrant community where knowledge is shared freely, and
@@ -154,11 +154,11 @@ export default function AboutPage() {
       {/* Call to Action Section */}
       <section className="text-center">
         <h2 className="text-3xl font-semibold mb-6 text-primary">
-          Join the Blogify Community!
+          Join the synblog Community!
         </h2>
         <p className="text-lg text-muted-foreground mb-8">
           Stay updated with our latest articles and connect with a community
-          passionate about technology and software development. Blogify is an
+          passionate about technology and software development. synblog is an
           open-source project, so you’re also welcome to contribute and help
           shape the platform together!
         </p>

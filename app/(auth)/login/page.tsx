@@ -4,8 +4,8 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { config } from "@/constants/config";
 
 export const metadata: Metadata = {
-  title: "Login - Blogify",
-  description: "Login to your Blogify account",
+  title: "Login - synblog",
+  description: "Login to your synblog account",
 };
 
 export default function LoginPage() {

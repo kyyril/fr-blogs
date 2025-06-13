@@ -85,7 +85,9 @@ export function BlogActions({ blog }: BlogActionsProps) {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`https://blogify.com/blog/${blog.slug}`);
+    navigator.clipboard.writeText(
+      `https://synblog.vercel.app/blog/${blog.slug}`
+    );
     toast({
       title: "Link copied",
       description: "The link has been copied to your clipboard",

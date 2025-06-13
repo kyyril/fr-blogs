@@ -21,7 +21,7 @@ const DynamicBlogList = dynamic(
 );
 
 export const metadata: Metadata = {
-  title: "Blogify - Home",
+  title: "synblog - Home",
   description:
     "Discover stories, ideas, and expertise from writers on any topic.",
   keywords: ["blog", "stories", "ideas", "expertise", "writing"],
@@ -34,7 +34,7 @@ export default function Home() {
       <section className="mb-16">
         <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-background p-8 text-center md:p-12">
           <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-            Welcome to Blogify
+            Welcome to synblog
           </h1>
           <p className="mb-6 text-lg text-muted-foreground md:text-xl">
             Discover stories, ideas, and expertise from writers on any topic

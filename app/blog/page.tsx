@@ -3,7 +3,7 @@ import { CategoryFilter } from "@/components/blog/category-filter";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "All Blogs - Blogify",
+  title: "All Blogs - synblog",
   description:
     "Discover stories, ideas, and expertise from writers on any topic",
 };

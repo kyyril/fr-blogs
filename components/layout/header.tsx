@@ -45,7 +45,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <span className="hidden text-xl font-bold sm:inline-block">
-            Blogify
+            /synblog
           </span>
         </Link>
         {/* Desktop Navigation */}

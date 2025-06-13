@@ -15,12 +15,24 @@ import { BlogDetailClientWrapper } from "@/components/blog/BlogDetailClientWrapp
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const response = await blogService.getBlogs(1, 1000); // Fetch up to 1000 blogs
-  const slugs = response.blogs.map((blog) => ({
-    slug: blog.id, // Assuming blog.id is the slug
-  }));
-  console.log("Generated static params:", slugs);
-  return slugs;
+  // Skip data fetching during build if SKIP_BUILD_DATA_FETCH is true
+  if (process.env.SKIP_BUILD_DATA_FETCH === "true") {
+    console.log("Skipping generateStaticParams data fetch during build.");
+    return []; // Return an empty array or a minimal set of slugs
+  }
+
+  try {
+    const response = await blogService.getBlogs(1, 1000); // Fetch up to 1000 blogs
+    const slugs = response.blogs.map((blog) => ({
+      slug: blog.id, // Assuming blog.id is the slug
+    }));
+    console.log("Generated static params:", slugs);
+    return slugs;
+  } catch (error) {
+    console.error("Error fetching blogs for generateStaticParams:", error);
+    // Fallback to an empty array or a minimal set of slugs on error
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -34,7 +46,7 @@ export async function generateMetadata({
     console.log("Generating metadata for blog:", blog);
     let createdAt = new Date(blog.date).toISOString();
     return {
-      title: `${blog.title} - Blogify`,
+      title: `${blog.title} - synblog`,
       description: blog.description,
       openGraph: {
         title: blog.title,
@@ -60,7 +72,7 @@ export async function generateMetadata({
     };
   } catch (error) {
     return {
-      title: "Blog Not Found - Blogify",
+      title: "Blog Not Found - synblog",
       description: "The requested blog could not be found.",
     };
   }

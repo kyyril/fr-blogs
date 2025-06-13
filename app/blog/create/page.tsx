@@ -1,9 +1,9 @@
-import { Metadata } from 'next';
-import { BlogForm } from '@/components/blog/blog-form';
+import { Metadata } from "next";
+import { BlogForm } from "@/components/blog/blog-form";
 
 export const metadata: Metadata = {
-  title: 'Create Blog - Blogify',
-  description: 'Create a new blog post on Blogify',
+  title: "Create Blog - synblog",
+  description: "Create a new blog post on synblog",
 };
 
 export default function CreateBlogPage() {

@@ -11,7 +11,7 @@ import { AppUserWrapper } from "@/providers/AppUserWrap";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Blogify - Share Your Stories",
+  title: "synblog - Share Your Stories",
   description:
     "A modern platform for sharing your thoughts and stories with the world",
 };
