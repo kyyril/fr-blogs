@@ -21,15 +21,19 @@ export class TokenService {
     }
 
     try {
+      // Decode the JWT to get the expiration time
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const expires = new Date(payload.exp * 1000); // Convert seconds to milliseconds
+
       // Use btoa for browser compatibility instead of Buffer
       const encodedToken = btoa(token);
       Cookies.set(this.TOKEN_KEY, encodedToken, {
-        expires: 7, // Token expires in 7 days
+        expires: expires, // Set expiration based on JWT exp
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "None", // Changed from "Lax" to "None" for full cross-site compatibility
       });
     } catch (error) {
-      console.error("Error encoding token:", error);
+      console.error("Error setting token:", error);
     }
   }
 

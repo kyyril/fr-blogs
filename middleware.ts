@@ -91,7 +91,7 @@ export default function middleware(req: NextRequest) {
   }
 
   // Define protected routes
-  const protectedRoutes = ["/profile", "/blog/create", "/dashboard"];
+  const protectedRoutes = ["/profile", "/blog/create", "/blog/edit"];
   const authRoutes = ["/login", "/auth/login"]; // Added both variants
 
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -118,7 +118,7 @@ export default function middleware(req: NextRequest) {
     // Check if there's a callback URL to redirect to
     const callback = req.nextUrl.searchParams.get("callback");
     const redirectUrl =
-      callback && callback.startsWith("/") ? callback : "/dashboard";
+      callback && callback.startsWith("/") ? callback : "/blog"; // Redirect to /blog instead of /dashboard
     return NextResponse.redirect(new URL(redirectUrl, req.url));
   }
 
@@ -151,7 +151,7 @@ export const config = {
     // Protected routes
     "/profile/:path*",
     "/blog/create/:path*",
-    "/dashboard/:path*",
+    "/blog/edit/:path*",
     // Auth routes
     "/login",
     "/auth/login",
