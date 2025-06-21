@@ -172,9 +172,10 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
     }
   };
 
-  const handleProfileClick = (authorId: string, event: React.MouseEvent) => {
+  const handleProfileClick = (comment: any, event: React.MouseEvent) => {
     event.stopPropagation();
-    router.push(`/profile/${authorId}`);
+    const profilePath = comment.author?.username || comment.authorId;
+    router.push(`/profile/${profilePath}`);
   };
 
   return (
@@ -233,7 +234,7 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                 {/* Profile-clickable Author Info */}
                 <div
                   className="cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={(e) => handleProfileClick(comment.authorId, e)}
+                  onClick={(e) => handleProfileClick(comment, e)}
                 >
                   <Avatar className="mt-1 h-8 w-8">
                     <AvatarImage
@@ -248,7 +249,7 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                   <div className="flex items-center justify-between">
                     <div
                       className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={(e) => handleProfileClick(comment.authorId, e)}
+                      onClick={(e) => handleProfileClick(comment, e)}
                     >
                       <p className="text-sm font-medium">
                         {comment?.author?.name}
@@ -401,9 +402,7 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                             {/* Profile-clickable Reply Author */}
                             <div
                               className="cursor-pointer hover:opacity-80 transition-opacity"
-                              onClick={(e) =>
-                                handleProfileClick(reply.authorId, e)
-                              }
+                              onClick={(e) => handleProfileClick(reply, e)}
                             >
                               <Avatar className="mt-1 h-6 w-6">
                                 <AvatarImage
@@ -420,9 +419,7 @@ export function BlogComments({ blogId }: BlogCommentsProps) {
                               <div className="flex items-center justify-between">
                                 <div
                                   className="cursor-pointer hover:opacity-80 transition-opacity"
-                                  onClick={(e) =>
-                                    handleProfileClick(reply.authorId, e)
-                                  }
+                                  onClick={(e) => handleProfileClick(reply, e)}
                                 >
                                   <p className="text-sm font-medium">
                                     {reply.author?.name}

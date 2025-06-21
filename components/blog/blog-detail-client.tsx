@@ -166,7 +166,7 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
               <div className="flex-1">
                 <Link
-                  href={`/profile/${blog.author?.id}`}
+                  href={`/profile/${blog.author?.username || blog.author?.id}`}
                   className="hover:text-primary transition-colors"
                 >
                   <h3 className="mb-1 text-lg font-semibold cursor-pointer">
@@ -204,7 +204,11 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
                   )}
 
                   {/* View Profile Button */}
-                  <Link href={`/profile/${blog.author?.id}`}>
+                  <Link
+                    href={`/profile/${
+                      blog.author?.username || blog.author?.id
+                    }`}
+                  >
                     <Button variant="outline" size="sm">
                       View Profile
                     </Button>

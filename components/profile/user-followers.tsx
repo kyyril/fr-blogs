@@ -52,7 +52,7 @@ export function UserFollowers({ userId }: UserFollowersProps) {
             <div key={follower.id}>
               <div className="flex items-center justify-between">
                 <Link
-                  href={`/profile/${follower.id}`}
+                  href={`/profile/${follower.username || follower.id}`}
                   className="flex items-center gap-3"
                 >
                   <Avatar>

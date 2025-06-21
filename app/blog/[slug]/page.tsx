@@ -90,7 +90,7 @@ async function BlogContent({ params }: { params: { slug: string } }) {
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <div className="flex items-center gap-2">
             <Link
-              href={`/profile/${blog.author.id}`}
+              href={`/profile/${blog.author.username}`}
               className="hover:opacity-80 transition-opacity"
             >
               <Avatar className="h-10 w-10 cursor-pointer">
@@ -108,7 +108,7 @@ async function BlogContent({ params }: { params: { slug: string } }) {
             </Link>
             <div className="text-left">
               <Link
-                href={`/profile/${blog.author.id}`}
+                href={`/profile/${blog.author.username}`}
                 className="hover:text-primary transition-colors"
               >
                 <p className="text-sm font-medium cursor-pointer">

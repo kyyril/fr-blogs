@@ -28,19 +28,19 @@ export function FeaturedBlogsSkeleton() {
                 <Skeleton className="h-4 w-16" />{" "}
                 {/* Skeleton for reading time */}
               </div>
-              <h3 className="line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
+              <div className="line-clamp-2 text-xl font-bold transition-colors group-hover:text-primary">
                 <Skeleton className="h-6 w-3/4" /> {/* Skeleton for title */}
-              </h3>
+              </div>
             </CardHeader>
             <CardContent className="flex-1 p-4 pt-0">
               {" "}
               {/* Use CardContent */}
-              <p className="line-clamp-2 text-sm text-muted-foreground">
+              <div className="line-clamp-2 text-sm text-muted-foreground space-y-2">
                 <Skeleton className="h-4 w-full" />{" "}
                 {/* Skeleton for description line 1 */}
-                <Skeleton className="h-4 w-5/6 mt-2" />{" "}
-                {/* Skeleton for description line 2, added margin-top */}
-              </p>
+                <Skeleton className="h-4 w-5/6" />{" "}
+                {/* Skeleton for description line 2 */}
+              </div>
             </CardContent>
             <CardFooter className="flex items-center justify-between p-4 pt-0">
               {" "}

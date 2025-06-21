@@ -17,6 +17,14 @@ export const useUser = () => {
     });
   };
 
+  const getProfileByUsername = (username: string) => {
+    return useQuery<User>({
+      queryKey: ["user", "username", username],
+      queryFn: () => userService.getProfileByUsername(username),
+      enabled: !!username, // Only run query if username is provided
+    });
+  };
+
   const followUser = useMutation({
     mutationFn: (userId: string) => userService.followUser(userId),
     onSuccess: (_, userId) => {
@@ -70,6 +78,7 @@ export const useUser = () => {
 
   return {
     getProfile,
+    getProfileByUsername,
     followUser,
     unfollowUser,
     followStatus,

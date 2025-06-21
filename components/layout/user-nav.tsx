@@ -48,7 +48,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link
-              href={`/profile/${user?.id}?`}
+              href={`/profile/${user?.username || user?.id}?`}
               className="flex w-full cursor-pointer items-center"
             >
               <User className="mr-2 h-4 w-4" />
@@ -57,7 +57,7 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href={`/profile/${user?.id}?tab=bookmarks`}
+              href={`/profile/${user?.username || user?.id}?tab=bookmarks`}
               className="flex w-full cursor-pointer items-center"
             >
               <Heart className="mr-2 h-4 w-4" />
@@ -66,7 +66,7 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link
-              href={`/profile/${user?.id}?tab=settings`}
+              href={`/profile/${user?.username || user?.id}?tab=settings`}
               className="flex w-full cursor-pointer items-center"
             >
               <Settings className="mr-2 h-4 w-4" />

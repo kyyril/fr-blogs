@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  username?: string;
   bio?: string;
   avatar?: string;
   googleId: string;
@@ -29,6 +30,7 @@ export interface UpdateProfileData {
   linkedinAcc: string;
   anotherAcc: string;
   avatar?: File;
+  username?: string;
 }
 
 export interface BlogPost {
@@ -48,6 +50,7 @@ export interface BlogPost {
     name: string;
     bio: string;
     avatar?: string;
+    username?: string;
   };
   authorId: string;
   viewCount: number;
@@ -60,6 +63,7 @@ export interface BlogPost {
 
 export interface Comment {
   id: string;
+  username?: string;
   content: string;
   createdAt: Date;
   updatedAt: Date;

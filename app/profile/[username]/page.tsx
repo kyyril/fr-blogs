@@ -6,7 +6,7 @@ export const runtime = "edge";
 
 interface ProfilePageProps {
   params: Promise<{
-    userId: string;
+    username: string;
   }>;
   searchParams: Promise<{
     tab?: string;
@@ -23,7 +23,7 @@ export default async function ProfilePage({
   return (
     <Suspense fallback={<ProfileLoadingSkeleton />}>
       <ProfilePageClient
-        userId={resolvedParams.userId}
+        username={resolvedParams.username}
         searchParams={resolvedSearchParams}
       />
     </Suspense>

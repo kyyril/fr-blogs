@@ -9,6 +9,7 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
+  username?: string;
   avatar: string;
 }
 
@@ -26,6 +27,10 @@ export class UserService {
 
   async getProfile(userId: string): Promise<User> {
     return httpService.get<User>(`/api/users/${userId}`);
+  }
+
+  async getProfileByUsername(username: string): Promise<User> {
+    return httpService.get<User>(`/api/users/username/${username}`);
   }
 
   async getCurrentUserProfile(): Promise<User> {

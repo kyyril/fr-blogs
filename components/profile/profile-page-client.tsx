@@ -26,17 +26,23 @@ import { RouteGuard } from "@/components/auth/route-guard";
 import { useRouter } from "next/navigation";
 
 interface ProfilePageClientProps {
-  userId: string;
+  username: string;
   searchParams: {
     tab?: string;
   };
 }
 
 export default function ProfilePageClient({
-  userId,
+  username,
   searchParams,
 }: ProfilePageClientProps) {
-  const { getProfile, followUser, unfollowUser, followStatus } = useUser();
+  const {
+    getProfile,
+    getProfileByUsername,
+    followUser,
+    unfollowUser,
+    followStatus,
+  } = useUser();
   const { user: currentUser } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
   const [followStatusLoading, setFollowStatusLoading] = useState(false);
@@ -44,7 +50,7 @@ export default function ProfilePageClient({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
 
-  const { data: user, isLoading, error } = getProfile(userId);
+  const { data: user, isLoading, error } = getProfileByUsername(username);
 
   useEffect(() => {
     if (searchParams.tab === "settings") {
@@ -61,9 +67,9 @@ export default function ProfilePageClient({
   }, [searchParams.tab]);
 
   useEffect(() => {
-    if (currentUser && userId !== currentUser.id) {
+    if (currentUser && user && user.id !== currentUser.id) {
       setFollowStatusLoading(true);
-      followStatus.mutate(userId, {
+      followStatus.mutate(user.id, {
         onSuccess: (data: any) => {
           setIsFollowing(data.is_following);
           setFollowStatusLoading(false);
@@ -73,17 +79,17 @@ export default function ProfilePageClient({
         },
       });
     }
-  }, [currentUser, userId]);
+  }, [currentUser, user]);
 
   const handleFollowToggle = async () => {
-    if (!currentUser) return;
+    if (!currentUser || !user) return;
 
     try {
       if (isFollowing) {
-        await unfollowUser.mutateAsync(userId);
+        await unfollowUser.mutateAsync(user.id);
         setIsFollowing(false);
       } else {
-        await followUser.mutateAsync(userId);
+        await followUser.mutateAsync(user.id);
         setIsFollowing(true);
       }
     } catch (error) {
@@ -111,7 +117,7 @@ export default function ProfilePageClient({
     );
   }
 
-  const isOwnProfile = currentUser?.id === userId;
+  const isOwnProfile = currentUser?.id === user?.id;
 
   return (
     <RouteGuard requireAuth={true}>
@@ -137,7 +143,7 @@ export default function ProfilePageClient({
                   <h1 className="text-2xl font-bold md:text-3xl">
                     {user.name}
                   </h1>
-                  <p className="text-muted-foreground">{user.email}</p>
+                  <p className="text-muted-foreground">{user.username}</p>
                 </div>
 
                 {/* Follow/Edit Button */}
@@ -169,7 +175,7 @@ export default function ProfilePageClient({
                         variant="ghost"
                         onClick={(e) => {
                           e.preventDefault();
-                          router.push(`/profile/${userId}?tab=settings`);
+                          router.push(`/profile/${username}?tab=settings`);
                         }}
                       >
                         Settings
@@ -178,7 +184,7 @@ export default function ProfilePageClient({
                         variant="outline"
                         onClick={(e) => {
                           e.preventDefault();
-                          router.push(`/profile/${userId}?tab=bookmarks`);
+                          router.push(`/profile/${username}?tab=bookmarks`);
                         }}
                       >
                         Bookmarks
@@ -194,10 +200,10 @@ export default function ProfilePageClient({
                           <DialogTitle>Profile Settings</DialogTitle>
                         </DialogHeader>
                         <ProfileSettings
-                          userId={userId}
+                          userId={user?.id || ""}
                           onClose={() => {
                             setIsSettingsOpen(false);
-                            router.push(`/profile/${userId}`);
+                            router.push(`/profile/${username}`);
                           }}
                         />
                       </DialogContent>
@@ -212,10 +218,10 @@ export default function ProfilePageClient({
                           <DialogTitle>Your Bookmarks</DialogTitle>
                         </DialogHeader>
                         <BookmarksComponent
-                          userId={userId}
+                          userId={user.id}
                           onClose={() => {
                             setIsBookmarksOpen(false);
-                            router.push(`/profile/${userId}`);
+                            router.push(`/profile/${user.id}`);
                           }}
                         />
                       </DialogContent>
@@ -304,10 +310,10 @@ export default function ProfilePageClient({
             />
           </TabsContent>
           <TabsContent value="followers" className="mt-6">
-            <UserFollowers userId={userId} />
+            <UserFollowers userId={user?.id || ""} />
           </TabsContent>
           <TabsContent value="following" className="mt-6">
-            <UserFollowing userId={userId} />
+            <UserFollowing userId={user?.id || ""} />
           </TabsContent>
         </Tabs>
       </div>

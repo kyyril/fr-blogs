@@ -7,6 +7,7 @@ export interface LoginResponse {
     name: string;
     avatar?: string;
     bio?: string;
+    username?: string;
   };
   message?: string;
 }

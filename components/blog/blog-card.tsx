@@ -48,11 +48,13 @@ export function BlogCard({
           name: profileUser.name,
           avatar: profileUser.avatar,
           id: profileUser.id,
+          username: profileUser.username,
         }
       : {
           name: blog.author?.name || "Anonymous",
           avatar: blog.author?.avatar,
           id: blog.author?.id,
+          username: blog.author?.username,
         };
 
   return (
@@ -116,7 +118,7 @@ export function BlogCard({
           {/* Author info - only show if not on profile page or if viewing someone else's profile */}
           {(!isProfile || (isProfile && user?.id !== profileUser?.id)) && (
             <Link
-              href={`/profile/${authorInfo.id}`}
+              href={`/profile/${authorInfo.username || authorInfo.id}`}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <Avatar className="h-6 w-6">
