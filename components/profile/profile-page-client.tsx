@@ -21,6 +21,7 @@ import {
 import { ProfileSettings } from "@/components/profile/profile-settings";
 import BookmarksComponent from "@/components/profile/bookmark";
 import ProfileLoadingSkeleton from "@/components/profile/Loading/ProfileLoadingSkeleton";
+import { RouteGuard } from "@/components/auth/route-guard";
 
 import { useRouter } from "next/navigation";
 
@@ -113,199 +114,203 @@ export default function ProfilePageClient({
   const isOwnProfile = currentUser?.id === userId;
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-8 space-y-8">
-        {/* Cover Image */}
-        <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-background md:h-64">
-          {/* Actual cover image would go here */}
-        </div>
-
-        {/* Profile Information */}
-        <div className="relative flex flex-col items-center text-center sm:flex-row sm:text-left">
-          <div className="absolute -top-16 sm:-top-20">
-            <Avatar className="h-32 w-32 border-4 border-background sm:h-40 sm:w-40">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name[0]}</AvatarFallback>
-            </Avatar>
+    <RouteGuard requireAuth={true}>
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="mb-8 space-y-8">
+          {/* Cover Image */}
+          <div className="relative h-48 w-full overflow-hidden rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-background md:h-64">
+            {/* Actual cover image would go here */}
           </div>
 
-          <div className="mt-16 w-full sm:mt-0 sm:ml-44">
-            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <div>
-                <h1 className="text-2xl font-bold md:text-3xl">{user.name}</h1>
-                <p className="text-muted-foreground">{user.email}</p>
-              </div>
-
-              {/* Follow/Edit Button */}
-              {!isOwnProfile && currentUser && (
-                <Button
-                  onClick={handleFollowToggle}
-                  disabled={
-                    followUser.isPending ||
-                    unfollowUser.isPending ||
-                    followStatusLoading
-                  }
-                  variant={isFollowing ? "outline" : "default"}
-                >
-                  {followUser.isPending || unfollowUser.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  {followStatusLoading
-                    ? "Loading..."
-                    : isFollowing
-                    ? "Unfollow"
-                    : "Follow"}
-                </Button>
-              )}
-
-              {isOwnProfile && (
-                <>
-                  <div className="gap-2 flex items-center">
-                    <Button
-                      variant="ghost"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        router.push(`/profile/${userId}?tab=settings`);
-                      }}
-                    >
-                      Settings
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        router.push(`/profile/${userId}?tab=bookmarks`);
-                      }}
-                    >
-                      Bookmarks
-                    </Button>
-                  </div>
-
-                  <Dialog
-                    open={isSettingsOpen}
-                    onOpenChange={setIsSettingsOpen}
-                  >
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Profile Settings</DialogTitle>
-                      </DialogHeader>
-                      <ProfileSettings
-                        userId={userId}
-                        onClose={() => {
-                          setIsSettingsOpen(false);
-                          router.push(`/profile/${userId}`);
-                        }}
-                      />
-                    </DialogContent>
-                  </Dialog>
-
-                  <Dialog
-                    open={isBookmarksOpen}
-                    onOpenChange={setIsBookmarksOpen}
-                  >
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Your Bookmarks</DialogTitle>
-                      </DialogHeader>
-                      <BookmarksComponent
-                        userId={userId}
-                        onClose={() => {
-                          setIsBookmarksOpen(false);
-                          router.push(`/profile/${userId}`);
-                        }}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                </>
-              )}
+          {/* Profile Information */}
+          <div className="relative flex flex-col items-center text-center sm:flex-row sm:text-left">
+            <div className="absolute -top-16 sm:-top-20">
+              <Avatar className="h-32 w-32 border-4 border-background sm:h-40 sm:w-40">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback>{user.name[0]}</AvatarFallback>
+              </Avatar>
             </div>
 
-            {user.bio && <p className="mt-4">{user.bio}</p>}
+            <div className="mt-16 w-full sm:mt-0 sm:ml-44">
+              <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                <div>
+                  <h1 className="text-2xl font-bold md:text-3xl">
+                    {user.name}
+                  </h1>
+                  <p className="text-muted-foreground">{user.email}</p>
+                </div>
 
-            <div className="mt-4 flex items-center justify-center gap-6 sm:justify-start">
-              <div className="text-center">
-                <p className="text-xl font-bold">{user._count?.blogs || 0}</p>
-                <p className="text-sm text-muted-foreground">Blogs</p>
+                {/* Follow/Edit Button */}
+                {!isOwnProfile && currentUser && (
+                  <Button
+                    onClick={handleFollowToggle}
+                    disabled={
+                      followUser.isPending ||
+                      unfollowUser.isPending ||
+                      followStatusLoading
+                    }
+                    variant={isFollowing ? "outline" : "default"}
+                  >
+                    {followUser.isPending || unfollowUser.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : null}
+                    {followStatusLoading
+                      ? "Loading..."
+                      : isFollowing
+                      ? "Unfollow"
+                      : "Follow"}
+                  </Button>
+                )}
+
+                {isOwnProfile && (
+                  <>
+                    <div className="gap-2 flex items-center">
+                      <Button
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          router.push(`/profile/${userId}?tab=settings`);
+                        }}
+                      >
+                        Settings
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          router.push(`/profile/${userId}?tab=bookmarks`);
+                        }}
+                      >
+                        Bookmarks
+                      </Button>
+                    </div>
+
+                    <Dialog
+                      open={isSettingsOpen}
+                      onOpenChange={setIsSettingsOpen}
+                    >
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Profile Settings</DialogTitle>
+                        </DialogHeader>
+                        <ProfileSettings
+                          userId={userId}
+                          onClose={() => {
+                            setIsSettingsOpen(false);
+                            router.push(`/profile/${userId}`);
+                          }}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    <Dialog
+                      open={isBookmarksOpen}
+                      onOpenChange={setIsBookmarksOpen}
+                    >
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Your Bookmarks</DialogTitle>
+                        </DialogHeader>
+                        <BookmarksComponent
+                          userId={userId}
+                          onClose={() => {
+                            setIsBookmarksOpen(false);
+                            router.push(`/profile/${userId}`);
+                          }}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  </>
+                )}
               </div>
-              <div className="text-center">
-                <p className="text-xl font-bold">
-                  {user._count?.following || 0}
-                </p>
-                <p className="text-sm text-muted-foreground">Followers</p>
+
+              {user.bio && <p className="mt-4">{user.bio}</p>}
+
+              <div className="mt-4 flex items-center justify-center gap-6 sm:justify-start">
+                <div className="text-center">
+                  <p className="text-xl font-bold">{user._count?.blogs || 0}</p>
+                  <p className="text-sm text-muted-foreground">Blogs</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold">
+                    {user._count?.following || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Followers</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold">
+                    {user._count?.followers || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Following</p>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-xl font-bold">
-                  {user._count?.followers || 0}
-                </p>
-                <p className="text-sm text-muted-foreground">Following</p>
-              </div>
+
+              {/* Social Links */}
+              {(user.twitterAcc || user.githubAcc || user.linkedinAcc) && (
+                <div className="mt-4 flex items-center justify-center gap-2 sm:justify-start">
+                  {user.twitterAcc && (
+                    <Button variant="ghost" size="icon" asChild>
+                      <a
+                        href={user.twitterAcc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Twitter className="h-5 w-5" />
+                      </a>
+                    </Button>
+                  )}
+                  {user.githubAcc && (
+                    <Button variant="ghost" size="icon" asChild>
+                      <a
+                        href={user.githubAcc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Github className="h-5 w-5" />
+                      </a>
+                    </Button>
+                  )}
+                  {user.linkedinAcc && (
+                    <Button variant="ghost" size="icon" asChild>
+                      <a
+                        href={user.linkedinAcc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Linkedin className="h-5 w-5" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Social Links */}
-            {(user.twitterAcc || user.githubAcc || user.linkedinAcc) && (
-              <div className="mt-4 flex items-center justify-center gap-2 sm:justify-start">
-                {user.twitterAcc && (
-                  <Button variant="ghost" size="icon" asChild>
-                    <a
-                      href={user.twitterAcc}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Twitter className="h-5 w-5" />
-                    </a>
-                  </Button>
-                )}
-                {user.githubAcc && (
-                  <Button variant="ghost" size="icon" asChild>
-                    <a
-                      href={user.githubAcc}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Github className="h-5 w-5" />
-                    </a>
-                  </Button>
-                )}
-                {user.linkedinAcc && (
-                  <Button variant="ghost" size="icon" asChild>
-                    <a
-                      href={user.linkedinAcc}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Linkedin className="h-5 w-5" />
-                    </a>
-                  </Button>
-                )}
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Tabs */}
+        <Tabs defaultValue="blogs">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="blogs">Blogs</TabsTrigger>
+            <TabsTrigger value="followers">Followers</TabsTrigger>
+            <TabsTrigger value="following">Following</TabsTrigger>
+          </TabsList>
+          <TabsContent value="blogs" className="mt-6">
+            <BlogList
+              blog={user.blogs}
+              featured={false}
+              isProfile={true}
+              currentUser={currentUser}
+              profileUser={user}
+            />
+          </TabsContent>
+          <TabsContent value="followers" className="mt-6">
+            <UserFollowers userId={userId} />
+          </TabsContent>
+          <TabsContent value="following" className="mt-6">
+            <UserFollowing userId={userId} />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Tabs */}
-      <Tabs defaultValue="blogs">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="blogs">Blogs</TabsTrigger>
-          <TabsTrigger value="followers">Followers</TabsTrigger>
-          <TabsTrigger value="following">Following</TabsTrigger>
-        </TabsList>
-        <TabsContent value="blogs" className="mt-6">
-          <BlogList
-            blog={user.blogs}
-            featured={false}
-            isProfile={true}
-            currentUser={currentUser}
-            profileUser={user}
-          />
-        </TabsContent>
-        <TabsContent value="followers" className="mt-6">
-          <UserFollowers userId={userId} />
-        </TabsContent>
-        <TabsContent value="following" className="mt-6">
-          <UserFollowing userId={userId} />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </RouteGuard>
   );
 }

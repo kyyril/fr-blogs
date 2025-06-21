@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { setAuth, clearAuth } from "@/store/slices/authSlice";
@@ -9,6 +9,7 @@ export const useAuth = () => {
   const { isAuthenticated, user } = useSelector(
     (state: RootState) => state.auth
   );
+  const [isLoading, setIsLoading] = useState(true);
 
   const login = useCallback(
     async (credential: string): Promise<LoginResponse> => {
@@ -44,11 +45,14 @@ export const useAuth = () => {
   // Initialize auth state from server
   const initializeAuth = useCallback(async () => {
     try {
+      setIsLoading(true);
       const response = await authService.getMe();
       dispatch(setAuth({ user: response.user }));
     } catch (error) {
       console.error("Auth initialization failed:", error);
       dispatch(clearAuth());
+    } finally {
+      setIsLoading(false);
     }
   }, [dispatch]);
 
@@ -103,6 +107,7 @@ export const useAuth = () => {
   return {
     isAuthenticated,
     user,
+    isLoading,
     login,
     logout,
     checkAuth,
