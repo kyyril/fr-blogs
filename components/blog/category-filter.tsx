@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Search, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Search, X, Filter } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
@@ -23,7 +30,8 @@ const categories = [
   { name: "Wellness", slug: "wellness" },
 ];
 
-export function CategoryFilter() {
+// Filter content component that will be used in both desktop and mobile versions
+function FilterContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get("category") || "";
@@ -50,9 +58,7 @@ export function CategoryFilter() {
   };
 
   return (
-    <div className="w-full rounded-lg border p-4">
-      <h2 className="mb-4 text-lg font-semibold">Categories</h2>
-
+    <>
       <div className="relative mb-4">
         <Input
           type="search"
@@ -128,6 +134,85 @@ export function CategoryFilter() {
           ))}
         </div>
       </div>
+    </>
+  );
+}
+
+// Desktop version - hidden on mobile
+export function CategoryFilter() {
+  return (
+    <div className="w-full rounded-lg border p-4">
+      <h2 className="mb-4 text-lg font-semibold">Categories</h2>
+      <FilterContent />
+    </div>
+  );
+}
+
+// Mobile version - visible only on mobile
+export function MobileCategoryFilter() {
+  const searchParams = useSearchParams();
+  const currentCategory = searchParams.get("category") || "";
+  const currentTags = searchParams.get("tags") || "";
+
+  // Show active filter count
+  const activeFiltersCount = (currentCategory ? 1 : 0) + (currentTags ? 1 : 0);
+
+  // Get display text for active filters
+  const getFilterText = () => {
+    if (currentCategory && currentTags) {
+      return `${currentCategory}, #${currentTags}`;
+    } else if (currentCategory) {
+      return currentCategory;
+    } else if (currentTags) {
+      return `#${currentTags}`;
+    }
+    return "Filter & Categories";
+  };
+
+  return (
+    <div className="md:hidden mb-4">
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            className="w-full justify-start h-12 px-4 text-left"
+          >
+            <Filter className="mr-2 h-4 w-4 flex-shrink-0" />
+            <span className="truncate flex-1">
+              {activeFiltersCount > 0 ? getFilterText() : "Filter & Categories"}
+            </span>
+            {activeFiltersCount > 0 && (
+              <span className="ml-2 rounded-full bg-primary px-2 py-1 text-xs text-primary-foreground flex-shrink-0">
+                {activeFiltersCount}
+              </span>
+            )}
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+          <SheetHeader>
+            <SheetTitle>Filter & Categories</SheetTitle>
+            {activeFiltersCount > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {activeFiltersCount} filter{activeFiltersCount > 1 ? "s" : ""}{" "}
+                  active
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="h-auto p-1 text-xs"
+                >
+                  <Link href="/blog">Clear all</Link>
+                </Button>
+              </div>
+            )}
+          </SheetHeader>
+          <div className="mt-6">
+            <FilterContent />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

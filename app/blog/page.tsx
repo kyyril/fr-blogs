@@ -1,5 +1,8 @@
 import { BlogList } from "@/components/blog/blog-list";
-import { CategoryFilter } from "@/components/blog/category-filter";
+import {
+  CategoryFilter,
+  MobileCategoryFilter,
+} from "@/components/blog/category-filter";
 import { Metadata } from "next";
 
 export const runtime = "edge";
@@ -31,6 +34,9 @@ export default async function BlogsPage({
             : "Discover stories, ideas, and expertise from writers on any topic"}
         </p>
       </div>
+
+      {/* Mobile Filter */}
+      <MobileCategoryFilter />
 
       <div className="grid gap-6 md:grid-cols-[200px_1fr]">
         <aside className="hidden md:block">
