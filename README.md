@@ -69,27 +69,3 @@ yarn dev
 ```
 
 The application will be accessible at `http://localhost:3000`.
-
-## Project Structure
-
-```
-.
-├── app/                  # Next.js pages and routes
-├── components/           # Reusable React components
-├── constants/            # Application-wide constants
-├── hooks/                # Custom React hooks
-├── lib/                  # Utility functions and types
-├── providers/            # Context providers for the application
-├── services/             # API service integrations
-├── store/                # Redux store configuration and slices
-├── styles/               # Global styles
-├── public/               # Static assets
-├── .env.development      # Environment variables for development
-├── .env.production       # Environment variables for production
-├── next.config.js        # Next.js configuration
-├── package.json          # Project dependencies and scripts
-├── postcss.config.js     # PostCSS configuration
-├── tailwind.config.ts    # Tailwind CSS configuration
-├── tsconfig.json         # TypeScript configuration
-└── README.md             # Project documentation
-```

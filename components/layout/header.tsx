@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserNav } from "@/components/layout/user-nav";
 import { useAuth } from "@/hooks/useAuth";
+import { SearchModal } from "@/components/layout/search-modal";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -67,30 +68,14 @@ export function Header() {
 
         {/* Desktop Right Actions */}
         <div className="hidden items-center gap-4 md:flex">
-          {isSearchOpen ? (
-            <div className="relative w-full max-w-xs animate-in fade-in slide-in-from-left-4 duration-300">
-              <Input
-                type="search"
-                placeholder="Search blogs..."
-                className="pr-8"
-                autoFocus
-                onBlur={() => setIsSearchOpen(false)}
-              />
-              <X
-                className="absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 cursor-pointer text-muted-foreground"
-                onClick={() => setIsSearchOpen(false)}
-              />
-            </div>
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Search"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Search"
+            onClick={() => setIsSearchModalOpen(true)}
+          >
+            <Search className="h-5 w-5" />
+          </Button>
 
           <ThemeToggle />
 
@@ -109,7 +94,12 @@ export function Header() {
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-4 md:hidden">
-          <Button variant="ghost" size="icon" aria-label="Search">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Search"
+            onClick={() => setIsSearchModalOpen(true)}
+          >
             <Search className="h-5 w-5" />
           </Button>
           <ThemeToggle />
@@ -172,6 +162,12 @@ export function Header() {
           </nav>
         </div>
       )}
+
+      {/* Search Modal */}
+      <SearchModal
+        open={isSearchModalOpen}
+        onOpenChange={setIsSearchModalOpen}
+      />
     </header>
   );
 }
