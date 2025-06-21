@@ -26,14 +26,47 @@ class HttpService {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor to handle authentication errors
+    // Response interceptor to handle authentication errors and token extraction
     this.api.interceptors.response.use(
-      (response: AxiosResponse) => response,
+      (response: AxiosResponse) => {
+        // Check if response contains tokens and set them
+        if (response.data && typeof response.data === "object") {
+          const { accessToken, refreshToken } = response.data;
+          if (accessToken) {
+            console.log("Setting tokens from HTTP response");
+            tokenService.setTokens(accessToken, refreshToken);
+          }
+        }
+
+        // Also check for tokens in Set-Cookie headers (for backend-set cookies)
+        const setCookieHeader = response.headers["set-cookie"];
+        if (setCookieHeader) {
+          console.log("Backend set cookies detected:", setCookieHeader);
+          // Extract tokens from Set-Cookie headers if needed
+          setCookieHeader.forEach((cookie: string) => {
+            if (cookie.includes("access_token=")) {
+              const tokenMatch = cookie.match(/access_token=([^;]+)/);
+              if (tokenMatch) {
+                console.log("Found access_token in Set-Cookie header");
+              }
+            }
+            if (cookie.includes("refresh_token=")) {
+              const tokenMatch = cookie.match(/refresh_token=([^;]+)/);
+              if (tokenMatch) {
+                console.log("Found refresh_token in Set-Cookie header");
+              }
+            }
+          });
+        }
+
+        return response;
+      },
       async (error) => {
         if (error.response?.status === 401) {
           // Token expired or invalid - clear auth state and redirect
           if (typeof window !== "undefined") {
             localStorage.removeItem("user");
+            tokenService.removeTokens();
           }
         }
         return Promise.reject(error);

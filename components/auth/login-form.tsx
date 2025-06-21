@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "@/hooks/useAuth";
+import { tokenService } from "@/services/token.services";
 
 export function LoginForm() {
   const router = useRouter();
@@ -34,12 +35,33 @@ export function LoginForm() {
             console.log("Login response:", res);
 
             if (res && res.user) {
+              // Add debugging for cookies after login
+              console.log("Login successful, checking cookies...");
+              console.log("Document cookies:", document.cookie);
+
+              // Wait a bit for cookies to be set
+              setTimeout(() => {
+                console.log("Cookies after timeout:", document.cookie);
+                console.log(
+                  "Access token from service:",
+                  tokenService.getAccessToken()
+                );
+                console.log(
+                  "Refresh token from service:",
+                  tokenService.getRefreshToken()
+                );
+              }, 100);
+
               toast({
                 title: "Login successful",
                 description: `Welcome back, ${res.user.name}!`,
               });
               console.log("Redirecting to home...");
-              router.push("/");
+
+              // Force a full page reload to ensure middleware picks up new cookies
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 500);
             } else {
               throw new Error("Invalid response from login");
             }
