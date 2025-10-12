@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "synblog - Share Your Stories",
   description:
     "A modern platform for sharing your thoughts and stories with the world",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({

@@ -147,7 +147,7 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
           <div className="mb-12 rounded-lg bg-muted p-6">
             <div className="flex flex-col items-start gap-4 sm:flex-row">
               <Link
-                href={`/profile/${blog.author?.id}`}
+                href={`/profile/${blog.author?.username}`}
                 className="hover:opacity-80 transition-opacity"
               >
                 <Avatar className="h-16 w-16 cursor-pointer">
@@ -166,7 +166,7 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
               <div className="flex-1">
                 <Link
-                  href={`/profile/${blog.author?.username || blog.author?.id}`}
+                  href={`/profile/${blog.author?.username}`}
                   className="hover:text-primary transition-colors"
                 >
                   <h3 className="mb-1 text-lg font-semibold cursor-pointer">
@@ -205,9 +205,7 @@ export function BlogDetailClient({ blog }: BlogDetailClientProps) {
 
                   {/* View Profile Button */}
                   <Link
-                    href={`/profile/${
-                      blog.author?.username || blog.author?.id
-                    }`}
+                    href={`/profile/${blog.author?.username}`}
                   >
                     <Button variant="outline" size="sm">
                       View Profile

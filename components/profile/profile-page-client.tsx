@@ -221,7 +221,7 @@ export default function ProfilePageClient({
                           userId={user.id}
                           onClose={() => {
                             setIsBookmarksOpen(false);
-                            router.push(`/profile/${user.id}`);
+                            router.push(`/profile/${user.username}`);
                           }}
                         />
                       </DialogContent>
