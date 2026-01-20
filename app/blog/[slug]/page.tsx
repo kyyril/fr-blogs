@@ -1,5 +1,3 @@
-export const runtime = "edge";
-
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,61 +7,66 @@ import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { blogService } from "@/services/blog.services";
 import NotFound from "@/components/blog/not-found";
-import { Suspense } from "react";
+import { Suspense, cache } from "react";
 import BlogDetailSkeleton from "@/components/blog/Loading/BlogDetailSkeleton";
 import { BlogDetailClientWrapper } from "@/components/blog/BlogDetailClientWrapper";
+
+// ⚡ PERFORMANCE: Cache the blog fetch to avoid duplicate requests
+const getBlog = cache(async (slug: string) => {
+  try {
+    return await blogService.getBlogById(slug);
+  } catch (error) {
+    return null;
+  }
+});
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  try {
-    const resolvedParams = await params;
-    const blog = await blogService.getBlogById(resolvedParams.slug);
-    let createdAt = new Date(blog.date).toISOString();
-    return {
-      title: `${blog.title} - synblog`,
-      description: blog.description,
-      openGraph: {
-        title: blog.title,
-        description: blog.description,
-        type: "article",
-        publishedTime: createdAt,
-        authors: [blog.author.name],
-        images: [
-          {
-            url: blog.image,
-            width: 1200,
-            height: 630,
-            alt: blog.title,
-          },
-        ],
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: blog.title,
-        description: blog.description,
-        images: [blog.image],
-      },
-    };
-  } catch (error) {
+  const resolvedParams = await params;
+  const blog = await getBlog(resolvedParams.slug);
+
+  if (!blog) {
     return {
       title: "Blog Not Found - synblog",
       description: "The requested blog could not be found.",
     };
   }
+
+  let createdAt = new Date(blog.date).toISOString();
+  return {
+    title: `${blog.title} - synblog`,
+    description: blog.description,
+    openGraph: {
+      title: blog.title,
+      description: blog.description,
+      type: "article",
+      publishedTime: createdAt,
+      authors: [blog.author.name],
+      images: [
+        {
+          url: blog.image,
+          width: 1200,
+          height: 630,
+          alt: blog.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.title,
+      description: blog.description,
+      images: [blog.image],
+    },
+  };
 }
 
 // Separate component for blog content
 async function BlogContent({ params }: { params: { slug: string } }) {
-  let blog;
-
-  try {
-    blog = await blogService.getBlogById(params.slug);
-  } catch (error) {
-    return <NotFound />;
-  }
+  // ⚡ PERFORMANCE: Uses cached result from generateMetadata
+  const blog = await getBlog(params.slug);
 
   if (!blog) {
     return <NotFound />;
@@ -165,7 +168,6 @@ export default async function BlogPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  // BlogContent is now an async component, so it can directly receive the resolved params
   const resolvedParams = await params;
   return (
     <Suspense fallback={<BlogDetailSkeleton />}>

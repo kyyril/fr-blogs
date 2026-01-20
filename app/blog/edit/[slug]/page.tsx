@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { EditBlogWrapper } from "@/components/blog/edit-blog-wrapper";
 
-export const runtime = "edge";
 
 export const metadata: Metadata = {
   title: "Edit Blog - synblog",

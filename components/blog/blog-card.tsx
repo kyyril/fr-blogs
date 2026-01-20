@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -12,6 +14,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { BlogPost } from "@/lib/types/data.interface";
 import { useAuth } from "@/hooks/useAuth";
+import { useBlog } from "@/hooks/useBlog";
+import { useCallback } from "react";
 
 interface BlogCardProps {
   blog: BlogPost;
@@ -31,6 +35,7 @@ export function BlogCard({
   isRelated = false,
 }: BlogCardProps) {
   const { user: authUser } = useAuth();
+  const { prefetchBlogDetail } = useBlog();
 
   // Use passed currentUser or fallback to hook
   const user = currentUser || authUser;
@@ -45,23 +50,28 @@ export function BlogCard({
   const authorInfo =
     isProfile && profileUser
       ? {
-          name: profileUser.name,
-          avatar: profileUser.avatar,
-          id: profileUser.id,
-          username: profileUser.username,
-        }
+        name: profileUser.name,
+        avatar: profileUser.avatar,
+        id: profileUser.id,
+        username: profileUser.username,
+      }
       : {
-          name: blog.author?.name || "Anonymous",
-          avatar: blog.author?.avatar,
-          id: blog.author?.id,
-          username: blog.author?.username,
-        };
+        name: blog.author?.name || "Anonymous",
+        avatar: blog.author?.avatar,
+        id: blog.author?.id,
+        username: blog.author?.username,
+      };
+
+  // ⚡ PERFORMANCE: Prefetch blog detail on hover for instant navigation
+  const handleMouseEnter = useCallback(() => {
+    prefetchBlogDetail(blog.id);
+  }, [blog.id, prefetchBlogDetail]);
 
   return (
     <Card
-      className={`overflow-hidden transition-all hover:shadow-md group ${
-        featured ? "flex flex-col md:flex-row" : ""
-      }`}
+      className={`overflow-hidden transition-all hover:shadow-md group ${featured ? "flex flex-col md:flex-row" : ""
+        }`}
+      onMouseEnter={handleMouseEnter}
     >
       <div
         className={`relative ${featured ? "h-48 md:h-auto md:w-2/5" : "h-48"}`}

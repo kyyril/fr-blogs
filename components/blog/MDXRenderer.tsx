@@ -75,13 +75,14 @@ export function MDXRenderer({ content }: MDXRendererProps) {
         rehypePlugins={[rehypeRaw, rehypeSlug]}
         components={{
           // Basic text styling
+          // Basic text styling - Use div instead of p to avoid hydration errors (div inside p)
           p: ({ children, ...props }) => (
-            <p
-              className="leading-7 text-foreground/70 [&:not(:first-child)]:mt-6"
+            <div
+              className="leading-7 text-foreground/70 [&:not(:first-child)]:mt-6 mb-6"
               {...props}
             >
               {children}
-            </p>
+            </div>
           ),
 
           // Clean heading styles

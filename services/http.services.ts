@@ -5,11 +5,15 @@ import { config } from "@/constants/config";
 class HttpService {
   private static instance: HttpService;
   private api: AxiosInstance;
+  // ⚡ PERFORMANCE: Request deduplication cache
+  private pendingRequests: Map<string, Promise<any>> = new Map();
 
   private constructor() {
     this.api = axios.create({
       baseURL: config.apiBaseUrl || "http://localhost:5000",
       withCredentials: true,
+      // ⚡ PERFORMANCE: Set reasonable timeout
+      timeout: 10000,
     });
 
     // Request interceptor to ensure credentials are sent
@@ -81,9 +85,28 @@ class HttpService {
     return HttpService.instance;
   }
 
+  // ⚡ PERFORMANCE: GET with request deduplication
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.api.get<T>(url, config);
-    return response.data;
+    const cacheKey = `GET:${url}:${JSON.stringify(config?.params || {})}`;
+
+    // Return existing pending request if available
+    if (this.pendingRequests.has(cacheKey)) {
+      return this.pendingRequests.get(cacheKey)!;
+    }
+
+    // Create new request and cache it
+    const request = this.api.get<T>(url, config)
+      .then(response => {
+        this.pendingRequests.delete(cacheKey);
+        return response.data;
+      })
+      .catch(error => {
+        this.pendingRequests.delete(cacheKey);
+        throw error;
+      });
+
+    this.pendingRequests.set(cacheKey, request);
+    return request;
   }
 
   async post<T>(

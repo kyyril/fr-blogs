@@ -10,7 +10,6 @@ const DynamicBlogDetailClient = dynamic(
       (mod) => mod.BlogDetailClient
     ),
   {
-    ssr: false,
     loading: () => <BlogDetailSkeleton />,
   }
 );

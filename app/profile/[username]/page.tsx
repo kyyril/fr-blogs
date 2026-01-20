@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import ProfileLoadingSkeleton from "@/components/profile/Loading/ProfileLoadingSkeleton";
 import ProfilePageClient from "@/components/profile/profile-page-client";
 
-export const runtime = "edge";
 
 interface ProfilePageProps {
   params: Promise<{

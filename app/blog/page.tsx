@@ -5,7 +5,6 @@ import {
 } from "@/components/blog/category-filter";
 import { Metadata } from "next";
 
-export const runtime = "edge";
 
 export const metadata: Metadata = {
   title: "All Blogs - synblog",
@@ -28,10 +27,10 @@ export default async function BlogsPage({
           {category
             ? `Browse all posts in ${category}`
             : tags
-            ? `Browse all posts tagged with ${tags}`
-            : search
-            ? `Search results for "${search}"`
-            : "Discover stories, ideas, and expertise from writers on any topic"}
+              ? `Browse all posts tagged with ${tags}`
+              : search
+                ? `Search results for "${search}"`
+                : "Discover stories, ideas, and expertise from writers on any topic"}
         </p>
       </div>
 
